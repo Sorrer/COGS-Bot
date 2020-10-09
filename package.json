@@ -1,0 +1,29 @@
+{
+  "name": "COGSBot",
+  "version": "0.5.0",
+  "description": "A Discord bot for managing Rutgers COGS Discord.",
+  "main": "cogsbot.js",
+  "scripts": {
+    "start": "node cogsbot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Sorrer",
+  "license": "MIT",
+  "bugs": {
+    "url": ""
+  },
+  "homepage": "",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "mysql2": "^2.2.5"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "*.md",
+      ".latestActivityID"
+    ]
+  }
+}

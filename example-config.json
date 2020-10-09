@@ -1,0 +1,30 @@
+{
+	"bot": {
+		"token": ""
+	},
+	
+	"discord":{
+		"serverid": "",
+		
+		"admins":[
+			""
+		],
+		"categories":{
+			"project": "projects"
+		},
+		"prefix": ";"
+	},
+	
+	"mysql": {
+		"host": "",
+		"user": "",
+		"port": "",
+		"password": "",
+		"database": "",
+		"supportBigNumbers": true,
+		"bigNumberStrings": true,
+		"waitForConnections": true,
+		"connectionLimit": 10,
+		"queueLimit": 0
+	},
+}
