@@ -68,10 +68,11 @@ async function startCon(){
 startCon();
 
 client.on("message", async function(message){
+    
+    //Prevent loops, this bot isn't allow to execute itself
+    if(message.author.id === client.user.id) return;
 
-	if(message.author.id === client.user.id) return;
-
-
+    //Execute commands only if its in the correct format, or if the person has a task pending for them.
     if(message.content.startsWith(";") || Commands.InTaskQueue(message.author.id)){
 
         var isAdmin = config.discord.admins.includes(message.author.id);
@@ -82,7 +83,7 @@ client.on("message", async function(message){
 
         //Check for ownership, if admin wants to do something for a channel that requires a project id, we'll try to get the project id if available.
 
-		if(isAdmin){
+	if(isAdmin){
             const [ownerInfo, fields] = await mysqlCon.query("SELECT * FROM channelinfo WHERE channelid = ?", [message.channel.id]);
 
             if(ownerInfo && ownerInfo[0]){
@@ -124,7 +125,7 @@ client.on("message", async function(message){
             isOwner = false;
         }
 
-
+	//Data gathered, execute command
         try{
             await Commands.ExecuteMessage(message, message.author, isAdmin, isOwner, ownerProjectID);
         }catch(e){
