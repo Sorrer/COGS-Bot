@@ -1,5 +1,5 @@
 # COGS-Bot
-A Discord bot for managing Rutgers COGS Discord.
+A Discord bot for managing Rutgers COGS Discord. https://discord.gg/aQUgesr
 
 ## Usage
 
