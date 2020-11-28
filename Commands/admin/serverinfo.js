@@ -1,6 +1,6 @@
 const Discord = require('discord.js')
 
-module.exports = {
+module.exports.settings = {
 
   name:"serverinfo",
   description: "returns info of server",
@@ -12,7 +12,7 @@ module.exports = {
   isTask: true
 
 
-  execute(message,args){
+  module.exports.execute = async function(author, message,args){
 
     const roles = message.guild.roles.cache;
     const emojis = message.guild.emojis.cache;
@@ -33,7 +33,7 @@ module.exports = {
             `**> Emoji Count: **${emojis.size}`,
             `**> Member Count: **${message.guild.memberCount}`,
         ]);
-    return message.channel.send(embed);
+    message.channel.send(embed);
 
   }
 }
