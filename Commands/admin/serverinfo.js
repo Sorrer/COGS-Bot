@@ -4,6 +4,12 @@ module.exports = {
 
   name:"serverinfo",
   description: "returns info of server",
+  usage: "Prefix + serverinfo will return an embed with some basic server info",
+  requiredParams: 0,
+  allowDM: false,
+  isAdmin: false,
+  isOwner: false,
+  isTask: true
 
 
   execute(message,args){
