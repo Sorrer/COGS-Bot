@@ -14,3 +14,7 @@ This project is meant for personal use for the RU COGS server.
 It allows you to create individual project listings with their own subsection of the server. A person can own a project, and then create channels and such only for the project through bot commands. Also they can manage their own project.
 
 Admins control the creation and deletion of projects.
+
+## Trello Board
+
+All todo features and currently worked on features are posted on this board. https://trello.com/b/RULJsOqB/cogs-bot-todo
