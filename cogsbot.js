@@ -10,7 +10,6 @@ const Commands = require('./Commands.js')
 const projectlist = require('./projectlist.js');
 
 var mysqlCon;
-var joinListChannelID = "";
 var currentServer = "";
 
 async function startup(){
@@ -39,14 +38,6 @@ async function startup(){
     projectlist.client = client;
     projectlist.tools = discordtools;
 
-	const [rows, fields] = await mysqlCon.query("SELECT * from channeltag where tag = 'joinlist'");
-
-    if(rows[0]){
-        console.log(rows + "\nFIELDS\n" + fields);
-        joinListChannelID = rows[0].id;
-        console.log("Hooked channel id: " + joinListChannelID);
-    }
-
     console.log("Registering Commands");
 
     Commands.InitiateCommands(client, mysqlCon, currentServer, logger, discordtools, projectlist);
@@ -68,7 +59,7 @@ async function startCon(){
 startCon();
 
 client.on("message", async function(message){
-    
+
     //Prevent loops, this bot isn't allow to execute itself
     if(message.author.id === client.user.id) return;
 
