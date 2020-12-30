@@ -198,12 +198,6 @@ module.exports.ExecuteMessage = async function ExecuteMessage(message, author = 
         }catch(e){
             console.log(e);
             console.log("Failed to execute command: " + element.settings.name);
-            
-            try{
-                message.channel.send(">Internal Server Error");
-            }catch(e){
-                console.log("Failed to send internal server error message");
-            }
         }
 
 
