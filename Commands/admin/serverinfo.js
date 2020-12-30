@@ -1,21 +1,22 @@
 const Discord = require('discord.js')
 
-module.exports.settings = {
 
+module.exports.settings = {
   name:"serverinfo",
   description: "returns info of server",
   usage: "Prefix + serverinfo will return an embed with some basic server info",
   requiredParams: 0,
   allowDM: false,
-  isAdmin: false,
+  isAdmin: true,
   isOwner: false,
-  isTask: true
+  isTask: false
+}
 
-
-  module.exports.execute = async function(author, message,args){
+module.exports.execute = async function(author, message,args){
 
     const roles = message.guild.roles.cache;
     const emojis = message.guild.emojis.cache;
+
     const embed = new Discord.MessageEmbed()
         .setDescription(`**Guild Information for __${message.guild.name}__**`)
         .setColor("#0020ff")
@@ -33,7 +34,7 @@ module.exports.settings = {
             `**> Emoji Count: **${emojis.size}`,
             `**> Member Count: **${message.guild.memberCount}`,
         ]);
+
     message.channel.send(embed);
 
-  }
 }
