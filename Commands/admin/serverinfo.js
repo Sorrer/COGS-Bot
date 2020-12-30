@@ -12,7 +12,7 @@ module.exports.settings = {
   isTask: false
 }
 
-module.exports.execute = async function(author, message,args){
+module.exports.execute = async function(author, params, message){
 
     const roles = message.guild.roles.cache;
     const emojis = message.guild.emojis.cache;
