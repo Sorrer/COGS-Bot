@@ -2,19 +2,22 @@
 	"bot": {
 		"token": ""
 	},
-	
+
 	"discord":{
 		"serverid": "",
-		
+
 		"admins":[
 			""
 		],
+        "channel": {
+                "log": ""
+        },
 		"categories":{
 			"project": "projects"
 		},
 		"prefix": ";"
 	},
-	
+
 	"mysql": {
 		"host": "",
 		"user": "",
