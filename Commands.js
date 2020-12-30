@@ -3,7 +3,7 @@
 var CommandsLoadRegistry =
 [
     "help", "createhelp",
-    "admin/createproject", "admin/deleteproject", "admin/updateprojectlisting",
+    "admin/createproject", "admin/deleteproject", "admin/updateprojectlisting", "admin/serverinfo"
     "user/join", "user/leave",
     "owner/changedescription", "owner/changetitle", "owner/createchat", "owner/deletechat"
 ]
