@@ -96,7 +96,7 @@ module.exports.OnMemberJoin = async function(member){
     if(joinedProjects){
         for(let usergroup of joinedProjects){
 
-            console.log("User has this group joined: " + usergroup);
+            console.log("User has this group joined: " + usergroup.channelid);
 
             let [project, projectFields] = await mysqlCon.query("SELECT * FROM channelinfo WHERE channelid = ?", [usergroup.channelid]);
 
