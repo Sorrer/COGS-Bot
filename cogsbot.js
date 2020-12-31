@@ -129,7 +129,7 @@ client.on("message", async function(message){
 
 });
 
-client.on("guildMemberAdd", function(member){
+client.on("guildMemberAdd", async function(member){
     //Member joined, check if member was part of any projects, if they owned any, and then add them back to their respective position (aka rebuild user)
 
 	logger.log("Member Joined: <@" + member.id +">", "Checking for past life.", "#feef6d");
