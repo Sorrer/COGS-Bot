@@ -108,7 +108,7 @@ module.exports.OnMemberJoin = async function(member){
             tools.AddUserToChannel(tchannel, member.id);
 
             added = true;
-            let [projectChannels, pFields] = await mysqlCon.query("SELECT * FROM projectchannels WHERE projectid = ?", project.projectid);
+            let [projectChannels, pFields] = await mysqlCon.query("SELECT * FROM projectchannels WHERE projectid = ?", project[0].projectid);
 
             for(let pchannel of projectChannels){
                 console.log("Adding them back to extra channel " + pchannel);
