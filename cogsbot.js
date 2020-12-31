@@ -118,6 +118,7 @@ client.on("message", async function(message){
 
 	//Data gathered, execute command
         try{
+			console.log("Execute command " + message.author + "  - '" + message + "'");
             await Commands.ExecuteMessage(message, message.author, isAdmin, isOwner, ownerProjectID);
         }catch(e){
             console.log(e);
