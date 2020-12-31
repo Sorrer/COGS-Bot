@@ -82,6 +82,7 @@ module.exports.OnMemberJoin = async function(member){
             let [projectChannels, pFields] = await mysqlCon.query("SELECT * FROM projectchannels WHERE projectid = ?", project.projectid);
 
             for(let pchannel of projectChannels){
+                console.log("Adding them back to extra channel " + pchannel);
                 let grabbedChannel = server.channels.cache.get(pchannel.channelid);
                 if(grabbedChannel) tools.AddUserToChannel(grabbedChannel, author.id);
             }
@@ -92,7 +93,6 @@ module.exports.OnMemberJoin = async function(member){
 
     const [joinedProjects, fields2] = await mysqlCon.query("SELECT * FROM usergroup WHERE userid = ?", [member.id]);
 
-    console.log(joinedProjects);
     if(joinedProjects){
         for(let usergroup of joinedProjects){
 
@@ -109,12 +109,13 @@ module.exports.OnMemberJoin = async function(member){
             let [projectChannels, pFields] = await mysqlCon.query("SELECT * FROM projectchannels WHERE channelid = ?", usergroup.channelid);
 
             for(let pchannel of projectChannels){
+                console.log("Adding them back to extra channel " + pchannel);
                 let grabbedChannel = server.channels.cache.get(pchannel.channelid);
                 if(grabbedChannel) tools.AddUserToChannel(grabbedChannel, author.id);
             }
         }
     }
 
-
+    console.log("Done rejoining");
     return true;
 }
