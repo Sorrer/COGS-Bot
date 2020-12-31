@@ -1,0 +1,28 @@
+{
+  "ecmaVersion": 8,
+  "libs": [],
+  "loadEagerly": [],
+  "dontLoad": [
+    "node_modules/**"
+  ],
+  "plugins": {
+    "doc_comment": true,
+    "node": {
+      "dontLoad": "",
+      "load": "",
+      "modules": ""
+    },
+    "requirejs": {
+      "baseURL": "",
+      "paths": "",
+      "override": ""
+    },
+    "commonjs": {},
+    "node_resolve": {},
+    "modules": {
+      "dontLoad": "",
+      "load": "",
+      "modules": ""
+    }
+  }
+}

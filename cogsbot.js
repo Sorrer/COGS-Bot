@@ -10,7 +10,6 @@ const Commands = require('./Commands.js')
 const projectlist = require('./projectlist.js');
 
 var mysqlCon;
-var joinListChannelID = "";
 var currentServer = "";
 
 async function startup(){
@@ -39,14 +38,6 @@ async function startup(){
     projectlist.client = client;
     projectlist.tools = discordtools;
 
-	const [rows, fields] = await mysqlCon.query("SELECT * from channeltag where tag = 'joinlist'");
-
-    if(rows[0]){
-        console.log(rows + "\nFIELDS\n" + fields);
-        joinListChannelID = rows[0].id;
-        console.log("Hooked channel id: " + joinListChannelID);
-    }
-
     console.log("Registering Commands");
 
     Commands.InitiateCommands(client, mysqlCon, currentServer, logger, discordtools, projectlist);
@@ -68,7 +59,7 @@ async function startCon(){
 startCon();
 
 client.on("message", async function(message){
-    
+
     //Prevent loops, this bot isn't allow to execute itself
     if(message.author.id === client.user.id) return;
 
@@ -127,6 +118,7 @@ client.on("message", async function(message){
 
 	//Data gathered, execute command
         try{
+			console.log("Execute command " + message.author + "  - '" + message + "'");
             await Commands.ExecuteMessage(message, message.author, isAdmin, isOwner, ownerProjectID);
         }catch(e){
             console.log(e);
@@ -138,6 +130,11 @@ client.on("message", async function(message){
 
 });
 
-client.on("guildMemberAdd", function(member){
+client.on("guildMemberAdd", async function(member){
     //Member joined, check if member was part of any projects, if they owned any, and then add them back to their respective position (aka rebuild user)
+
+	//logger.log("Member Joined: <@" + member.id +">", "Checking for past life.", "#feef6d");
+	var amountOfConnections = await Commands.MemberJoinEvent(member);
+	logger.log("Connected to Past Life: <@" + member.id +">", "Connected to past life if existed.\nAmount of successful connections ("+ amountOfConnections +")", "#16c98d");
+
 });

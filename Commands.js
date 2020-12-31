@@ -3,7 +3,7 @@
 var CommandsLoadRegistry =
 [
     "help", "createhelp",
-    "admin/createproject", "admin/deleteproject", "admin/updateprojectlisting",
+    "admin/createproject", "admin/deleteproject", "admin/updateprojectlisting", "admin/serverinfo",
     "user/join", "user/leave",
     "owner/changedescription", "owner/changetitle", "owner/createchat", "owner/deletechat"
 ]
@@ -14,6 +14,9 @@ var Logger = {
     sendDM: function(reciever, title, message, color = "dd"){console.log(reciever + " DM - " + title + "message")},
     sendInvalidCommandDM: function(reciever, theirMessage, msg, color = "dd") {console.log(reciever + " InvalidCommandDM - \n  " + theirMessage + "\n  " + msg)}
 };
+
+var OnMemberJoinCalls = [];
+
 
 function VerifyCommand(command){
 
@@ -45,12 +48,12 @@ function VerifyCommand(command){
     }
 
 
+
     return true;
 }
 
 function LoadCommand(command, discordClient, mysqlCon, discordServer, discordtools, projectlist){
 
-    console.log("Loaded command: '" + command.settings.name + "' - " + command.settings.description);
 
     command.mysqlCon = mysqlCon;
     command.client =  discordClient;
@@ -62,7 +65,15 @@ function LoadCommand(command, discordClient, mysqlCon, discordServer, discordtoo
         CommandsRegistry: CommandsRegistry
     };
 
+
+    if(command.OnMemberJoin){
+        OnMemberJoinCalls.push(command.OnMemberJoin);
+        console.log("Member join detected for '" + command.settings.name + "'. Registered");
+    }
+
     CommandsRegistry.push(command);
+
+    console.log("Loaded command: '" + command.settings.name + "' - " + command.settings.description + '\n');
 }
 
 module.exports.InitiateCommands = function InitiateCommands(discordClient, mysqlCon, discordServer, logger, discordtools, projectlist){
@@ -93,6 +104,29 @@ function AddTask(clientID, function_, allowDM, data = {}){
     TaskQueue.push({id: clientID, func: function_, allowDM: allowDM, data: data});
 }
 
+module.exports.MemberJoinEvent = async function ExecuteMemberJoinEvent(member){
+
+    let succesfullyExecuted = 0;
+
+    for(var i = 0; i < OnMemberJoinCalls.length; i++){
+        try{
+
+            if(await OnMemberJoinCalls[i](member)){
+                succesfullyExecuted++;
+            }
+
+        }catch(e){
+            try{
+                Logger.logError("Failed to execute callback", "Callback: (" + i + ") " + OnMemberJoinCalls[i] + "\n" + e);
+            }catch(e){
+                console.log("Failed to send error for callback", "Callbacks: " + OnMemberJoinCalls + "\n" + e);
+            }
+        }
+    }
+
+    return succesfullyExecuted;
+
+}
 
 module.exports.InTaskQueue = function InTaskQueue (clientID){
     for(let task of TaskQueue){
@@ -198,6 +232,12 @@ module.exports.ExecuteMessage = async function ExecuteMessage(message, author = 
         }catch(e){
             console.log(e);
             console.log("Failed to execute command: " + element.settings.name);
+
+            try{
+                message.channel.send(">Internal Server Error");
+            }catch(e){
+                console.log("Failed to send internal server error message");
+            }
         }
 
 
