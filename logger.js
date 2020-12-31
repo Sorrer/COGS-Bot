@@ -22,6 +22,10 @@ module.exports.log = function (title, msg, color = "#c829f0"){
 
 }
 
+module.exports.logError = function (title, msg){
+    module.exports.log("Error: " + title, msg, "#ED5565");
+}
+
 module.exports.sendDM = function (reciever, title, msg, color = "#c829f0"){
     var client = module.exports.client;
 
