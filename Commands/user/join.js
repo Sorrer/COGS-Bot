@@ -100,8 +100,8 @@ module.exports.OnMemberJoin = async function(member){
 
             let [project, projectFields] = await mysqlCon.query("SELECT * FROM channelinfo WHERE channelid = ?", [usergroup.channelid]);
 
-        	let vchannel = server.channels.cache.get(project.voicechannelid);
-        	let tchannel = server.channels.cache.get(project.channelid);
+        	let vchannel = server.channels.cache.get(project[0].voicechannelid);
+        	let tchannel = server.channels.cache.get(project[0].channelid);
 
             tools.AddUserToChannel(vchannel, member.id);
             tools.AddUserToChannel(tchannel, member.id);
