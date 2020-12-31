@@ -134,6 +134,6 @@ client.on("guildMemberAdd", async function(member){
 
 	logger.log("Member Joined: <@" + member.id +">", "Checking for past life.", "#feef6d");
 	await Commands.MemberJoinEvent(member);
-	logger.log("Member Joined: <@" + member.id +">", "Connected to past life if existed.", "#feef6d");
+	logger.log("Connected to Past Life: <@" + member.id +">", "Connected to past life if existed.", "#16c98d");
 
 });

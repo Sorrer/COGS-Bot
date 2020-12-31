@@ -54,7 +54,6 @@ function VerifyCommand(command){
 
 function LoadCommand(command, discordClient, mysqlCon, discordServer, discordtools, projectlist){
 
-    console.log("Loaded command: '" + command.settings.name + "' - " + command.settings.description);
 
     command.mysqlCon = mysqlCon;
     command.client =  discordClient;
@@ -73,6 +72,8 @@ function LoadCommand(command, discordClient, mysqlCon, discordServer, discordtoo
     }
 
     CommandsRegistry.push(command);
+
+    console.log("Loaded command: '" + command.settings.name + "' - " + command.settings.description + '\n');
 }
 
 module.exports.InitiateCommands = function InitiateCommands(discordClient, mysqlCon, discordServer, logger, discordtools, projectlist){
@@ -105,9 +106,9 @@ function AddTask(clientID, function_, allowDM, data = {}){
 
 module.exports.MemberJoinEvent = async function ExecuteMemberJoinEvent(member){
 
-    for(let callback in OnMemberJoinCalls){
+    for(var i = 1; i < OnMemberJoinCalls.length; i++){
         try{
-            await callback(member);
+            await callback[i](member);
         }catch(e){
             try{
                 Logger.logError("Failed to execute callback", "Callback: " + callback + "\n" + e);
