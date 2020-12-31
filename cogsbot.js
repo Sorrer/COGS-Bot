@@ -133,7 +133,7 @@ client.on("guildMemberAdd", async function(member){
     //Member joined, check if member was part of any projects, if they owned any, and then add them back to their respective position (aka rebuild user)
 
 	logger.log("Member Joined: <@" + member.id +">", "Checking for past life.", "#feef6d");
-	await Commands.OnMemberJoin(member);
+	await Commands.MemberJoinEvent(member);
 	logger.log("Member Joined: <@" + member.id +">", "Connected to past life if existed.", "#feef6d");
 
 });
