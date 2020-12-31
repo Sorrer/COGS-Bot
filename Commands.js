@@ -15,6 +15,9 @@ var Logger = {
     sendInvalidCommandDM: function(reciever, theirMessage, msg, color = "dd") {console.log(reciever + " InvalidCommandDM - \n  " + theirMessage + "\n  " + msg)}
 };
 
+var OnMemberJoinCalls = [];
+
+
 function VerifyCommand(command){
 
     if(!command){
@@ -45,6 +48,7 @@ function VerifyCommand(command){
     }
 
 
+
     return true;
 }
 
@@ -61,6 +65,12 @@ function LoadCommand(command, discordClient, mysqlCon, discordServer, discordtoo
     command.commands = {
         CommandsRegistry: CommandsRegistry
     };
+
+
+    if(command.OnMemberJoin){
+        OnMemberJoinCalls.push(command.OnMemberJoin);
+        console.log("Member join detected for '" + command.settings.name + "'. Registered");
+    }
 
     CommandsRegistry.push(command);
 }
@@ -93,6 +103,21 @@ function AddTask(clientID, function_, allowDM, data = {}){
     TaskQueue.push({id: clientID, func: function_, allowDM: allowDM, data: data});
 }
 
+module.exports.MemberJoinEvent = function ExecuteMemberJoinEvent(member){
+
+    for(let callback in OnMemberJoinCalls){
+        try{
+            callback(member);
+        }catch(e){
+            try{
+                Logger.logError("Failed to execute callback", "Callback: " + callback + "\n" + e);
+            }catch(e){
+                console.log("Failed to send error for callback", "Callback: " + callback + "\n" + e);
+            }
+        }
+    }
+
+}
 
 module.exports.InTaskQueue = function InTaskQueue (clientID){
     for(let task of TaskQueue){
@@ -198,7 +223,7 @@ module.exports.ExecuteMessage = async function ExecuteMessage(message, author = 
         }catch(e){
             console.log(e);
             console.log("Failed to execute command: " + element.settings.name);
-            
+
             try{
                 message.channel.send(">Internal Server Error");
             }catch(e){

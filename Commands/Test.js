@@ -40,3 +40,8 @@ module.exports.task1 = function(message, data){
 module.exports.task2 = function(message, data){
   console.log("Task2 : " + data.test);
 }
+
+
+module.exports.OnMemberJoin = function(member){
+    //Member joined! This will be called when that happens
+}
