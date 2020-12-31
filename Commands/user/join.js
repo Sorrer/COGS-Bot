@@ -83,9 +83,9 @@ module.exports.OnMemberJoin = async function(member){
             let [projectChannels, pFields] = await mysqlCon.query("SELECT * FROM projectchannels WHERE projectid = ?", project.projectid);
 
             for(let pchannel of projectChannels){
-                console.log("Adding them back to extra channel " + pchannel);
+                console.log("Adding them back to extra channel " + pchannel.channelid);
                 let grabbedChannel = server.channels.cache.get(pchannel.channelid);
-                if(grabbedChannel) tools.AddUserToChannel(grabbedChannel, author.id);
+                if(grabbedChannel) tools.AddUserToChannel(grabbedChannel, member.id);
             }
         }
     }
@@ -108,12 +108,12 @@ module.exports.OnMemberJoin = async function(member){
             tools.AddUserToChannel(tchannel, member.id);
 
             added = true;
-            let [projectChannels, pFields] = await mysqlCon.query("SELECT * FROM projectchannels WHERE channelid = ?", usergroup.channelid);
+            let [projectChannels, pFields] = await mysqlCon.query("SELECT * FROM projectchannels WHERE projectid = ?", project[0].projectid);
 
             for(let pchannel of projectChannels){
-                console.log("Adding them back to extra channel " + pchannel);
+                console.log("Adding them back to extra channel " + pchannel.channelid);
                 let grabbedChannel = server.channels.cache.get(pchannel.channelid);
-                if(grabbedChannel) tools.AddUserToChannel(grabbedChannel, author.id);
+                if(grabbedChannel) tools.AddUserToChannel(grabbedChannel, member.id);
             }
         }
     }
