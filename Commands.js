@@ -103,11 +103,11 @@ function AddTask(clientID, function_, allowDM, data = {}){
     TaskQueue.push({id: clientID, func: function_, allowDM: allowDM, data: data});
 }
 
-module.exports.MemberJoinEvent = function ExecuteMemberJoinEvent(member){
+module.exports.MemberJoinEvent = async function ExecuteMemberJoinEvent(member){
 
     for(let callback in OnMemberJoinCalls){
         try{
-            callback(member);
+            await callback(member);
         }catch(e){
             try{
                 Logger.logError("Failed to execute callback", "Callback: " + callback + "\n" + e);

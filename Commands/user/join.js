@@ -55,7 +55,7 @@ module.exports.execute = async function(author, params, message) {
 }
 
 
-module.exports.OnMemberJoin = function(member){
+module.exports.OnMemberJoin = async function(member){
 
     const [joinedProjects, fields2] = await mysqlCon.query("SELECT * FROM usergroup WHERE userid = ?", [member.id]);
 
@@ -64,7 +64,7 @@ module.exports.OnMemberJoin = function(member){
         for(var usergroup in joinedProjects){
 
             console.log("User has this group joined: " + usergroup);
-            
+
         }
     }
 
