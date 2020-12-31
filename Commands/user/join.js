@@ -57,6 +57,10 @@ module.exports.execute = async function(author, params, message) {
 
 module.exports.OnMemberJoin = async function(member){
 
+    var mysqlCon = module.exports.mysqlCon;
+    var tools = module.exports.tools;
+    var logger = module.exports.logger;
+
     const [joinedProjects, fields2] = await mysqlCon.query("SELECT * FROM usergroup WHERE userid = ?", [member.id]);
 
     if(joinedProjects){
@@ -68,9 +72,6 @@ module.exports.OnMemberJoin = async function(member){
         }
     }
 
-
-    var tools = module.exports.tools;
-    var logger = module.exports.logger;
 
     return true;
 }
