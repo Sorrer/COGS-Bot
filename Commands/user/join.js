@@ -64,6 +64,7 @@ module.exports.OnMemberJoin = async function(member){
 
 
     //Add back to owned projects
+    var added = false;
 
     const [ownedProjects, fields1] = await mysqlCon.query("SELECT * FROM channelinfo WHERE owner = ?", [member.id]);
 
@@ -74,11 +75,11 @@ module.exports.OnMemberJoin = async function(member){
         	let vchannel = server.channels.cache.get(project.voicechannelid);
         	let tchannel = server.channels.cache.get(project.channelid);
 
-
             tools.AddUserToChannel(vchannel, member.id);
             tools.AddUserToChannel(tchannel, member.id);
 
 
+            added = true;
             let [projectChannels, pFields] = await mysqlCon.query("SELECT * FROM projectchannels WHERE projectid = ?", project.projectid);
 
             for(let pchannel of projectChannels){
@@ -106,6 +107,7 @@ module.exports.OnMemberJoin = async function(member){
             tools.AddUserToChannel(vchannel, member.id);
             tools.AddUserToChannel(tchannel, member.id);
 
+            added = true;
             let [projectChannels, pFields] = await mysqlCon.query("SELECT * FROM projectchannels WHERE channelid = ?", usergroup.channelid);
 
             for(let pchannel of projectChannels){
@@ -117,5 +119,5 @@ module.exports.OnMemberJoin = async function(member){
     }
 
     console.log("Done rejoining");
-    return true;
+    return added;
 }
