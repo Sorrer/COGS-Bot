@@ -110,16 +110,16 @@ module.exports.MemberJoinEvent = async function ExecuteMemberJoinEvent(member){
 
     for(var i = 0; i < OnMemberJoinCalls.length; i++){
         try{
-            
-            if(await callback[i](member)){
+
+            if(await OnMemberJoinCalls[i](member)){
                 succesfullyExecuted++;
             }
 
         }catch(e){
             try{
-                Logger.logError("Failed to execute callback", "Callback: " + callback + "\n" + e);
+                Logger.logError("Failed to execute callback", "Callback: (" + i + ") " + OnMemberJoinCalls[i] + "\n" + e);
             }catch(e){
-                console.log("Failed to send error for callback", "Callback: " + callback + "\n" + e);
+                console.log("Failed to send error for callback", "Callbacks: " + OnMemberJoinCalls + "\n" + e);
             }
         }
     }
