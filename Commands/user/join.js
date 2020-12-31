@@ -72,4 +72,5 @@ module.exports.OnMemberJoin = async function(member){
     var tools = module.exports.tools;
     var logger = module.exports.logger;
 
+    return true;
 }

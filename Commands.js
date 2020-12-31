@@ -106,9 +106,15 @@ function AddTask(clientID, function_, allowDM, data = {}){
 
 module.exports.MemberJoinEvent = async function ExecuteMemberJoinEvent(member){
 
-    for(var i = 1; i < OnMemberJoinCalls.length; i++){
+    let succesfullyExecuted = 0;
+
+    for(var i = 0; i < OnMemberJoinCalls.length; i++){
         try{
-            await callback[i](member);
+            
+            if(await callback[i](member)){
+                succesfullyExecuted++;
+            }
+
         }catch(e){
             try{
                 Logger.logError("Failed to execute callback", "Callback: " + callback + "\n" + e);
@@ -117,6 +123,8 @@ module.exports.MemberJoinEvent = async function ExecuteMemberJoinEvent(member){
             }
         }
     }
+
+    return succesfullyExecuted;
 
 }
 
