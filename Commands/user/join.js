@@ -57,18 +57,61 @@ module.exports.execute = async function(author, params, message) {
 
 module.exports.OnMemberJoin = async function(member){
 
+    var server = module.exports.server;
     var mysqlCon = module.exports.mysqlCon;
     var tools = module.exports.tools;
     var logger = module.exports.logger;
 
+
+    //Add back to owned projects
+
+    const [ownedProjects, fields1] = await mysqlCon.query("SELECT * FROM channelinfo WHERE owner = ?", [member.id]);
+
+    if(ownedProjects){
+        for(let project of ownedProjects){
+            console.log("Owner owns a project, adding them back");
+
+        	let vchannel = server.channels.cache.get(project.voicechannelid);
+        	let tchannel = server.channels.cache.get(project.channelid);
+
+
+            tools.AddUserToChannel(vchannel, member.id);
+            tools.AddUserToChannel(tchannel, member.id);
+
+
+            let [projectChannels, pFields] = await mysqlCon.query("SELECT * FROM projectchannels WHERE projectid = ?", project.projectid);
+
+            for(let pchannel of projectChannels){
+                let grabbedChannel = server.channels.cache.get(pchannel.channelid);
+                if(grabbedChannel) tools.AddUserToChannel(grabbedChannel, author.id);
+            }
+        }
+    }
+
+    //Add back to joined projects
+
     const [joinedProjects, fields2] = await mysqlCon.query("SELECT * FROM usergroup WHERE userid = ?", [member.id]);
 
+    console.log(joinedProjects);
     if(joinedProjects){
-
-        for(var usergroup in joinedProjects){
+        for(let usergroup of joinedProjects){
 
             console.log("User has this group joined: " + usergroup);
 
+            let [project, projectFields] = await mysqlCon.query("SELECT * FROM channelinfo WHERE channelid = ?", [usergroup.channelid]);
+
+        	let vchannel = server.channels.cache.get(project.voicechannelid);
+        	let tchannel = server.channels.cache.get(project.channelid);
+
+            tools.AddUserToChannel(vchannel, member.id);
+            tools.AddUserToChannel(tchannel, member.id);
+
+            let [projectChannels, pFields] = await mysqlCon.query("SELECT * FROM projectchannels WHERE channelid = ?", usergroup.channelid);
+
+            for(let pchannel of projectChannels){
+                let grabbedChannel = server.channels.cache.get(pchannel.channelid);
+                if(grabbedChannel) tools.AddUserToChannel(grabbedChannel, author.id);
+            }
         }
     }
 
