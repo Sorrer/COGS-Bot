@@ -18,7 +18,9 @@
   "homepage": "",
   "dependencies": {
     "discord.js": "^12.2.0",
-    "mysql2": "^2.2.5"
+    "eslint": "^7.16.0",
+    "mysql2": "^2.2.5",
+    "walk-sync": "^2.2.0"
   },
   "nodemonConfig": {
     "ignore": [
