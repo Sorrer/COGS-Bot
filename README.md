@@ -18,7 +18,7 @@ Admins control the creation and deletion of projects.
 ## Updates
 
 COGS-Bot V2
-- Focuses more on ability to individual servers.
+- Focuses more on ability to use individual servers.
 - Better code structure.
 - Requires full new schema.
 
