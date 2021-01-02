@@ -9,6 +9,8 @@ class Commands {
 		this.commands = [];
 
 		this.logger = logger;
+
+		this.taskQueue = [];
 	}
 
 	load() {
@@ -41,11 +43,16 @@ class Commands {
 			return;
 		}
 
+		if(command.settings.enabled !== true) {
+			this.logger.local('Ignoring command, not enabled');
+			return;
+		}
+
 		this.logger.local(`Loading Command: '${command.description.name}'`);
 
 		this.commands.push(command);
 
-		this.logger.local(`Successfully loaded command: '${command.description.name}'`);
+		this.logger.local(`Successfully loaded command: '${command.description.name}'\n`);
 
 	}
 
@@ -56,6 +63,25 @@ class Commands {
 		}
 		else{
 			// TODO: Verify all settings requirements here
+			const settings = command.settings;
+			const errDescription = 'Failed to verify command settings - ';
+
+			let settingsFailed = false;
+
+			if(!settings.allowedUsage) {
+				settingsFailed = true;
+				this.logger.localErr(errDescription + ' usage not set. ');
+			}
+			else if(!Array.isArray(settings.allowedUsage)) {
+				settingsFailed = true;
+				this.logger.localErr(errDescription + ' usage not array. ');
+			}
+
+
+			if(settingsFailed) {
+				return false;
+			}
+
 		}
 
 		if(!command.description) {
@@ -72,23 +98,46 @@ class Commands {
 				descriptionFailed = true;
 				this.logger.localErr(errDescription + ' command not set. ');
 			}
+			else if(typeof (description.command) != 'string') {
+				descriptionFailed = true;
+				this.logger.localErr(errDescription + ' command not a string. ');
+			}
 
 			if(!description.name) {
 				descriptionFailed = true;
 				this.logger.localErr(errDescription + ' name not set. ');
+			}
+			else if(typeof (description.name) != 'string') {
+				descriptionFailed = true;
+				this.logger.localErr(errDescription + ' name not a string. ');
 			}
 
 			if(!description.description) {
 				descriptionFailed = true;
 				this.logger.localErr(errDescription + ' description not set. ');
 			}
+			else if(typeof (description.description) != 'string') {
+				descriptionFailed = true;
+				this.logger.localErr(errDescription + ' description not a string. ');
+			}
 
 			if(!description.usage) {
 				descriptionFailed = true;
 				this.logger.localErr(errDescription + ' usage not set. ');
 			}
+			else if(typeof (description.usage) != 'string') {
+				descriptionFailed = true;
+				this.logger.localErr(errDescription + ' usage not a string. ');
+			}
 
 			if(descriptionFailed) {
+				return false;
+			}
+		}
+
+		for(const otherCommand of this.commands) {
+			if(otherCommand.description.command == command.description.command) {
+				this.logger.localErr('Failed to verify command - Duplicate command name found!' + command.description.command);
 				return false;
 			}
 		}
@@ -101,6 +150,130 @@ class Commands {
 
 		return true;
 	}
+
+
+	addTask(clientID, channelID, function_, command, data = {}) {
+		this.taskQueue.push({ id: clientID, channel_id: channelID, execute: function_, command: command, data: data });
+		this.logger.localDebug(`Added new task for ${command.description.name}. ClientID - ${clientID}. ChannelID - ${channelID}`);
+	}
+
+	async handleTask(clientID, message, data) {
+		for(let index = 0; index < this.taskQueue.length; index++) {
+			const task = this.taskQueue[index];
+
+			if(task.id === clientID) {
+				let moreTasks = false;
+
+				try{
+					if(message.content.toLowerCase() != 'c') {
+						if(task.command.settings.allowDM == (message.channel.type == 'dm') || message.channel.id == task.channel_id) {
+							moreTasks = await task.execute(data);
+						}
+					}
+				}
+				catch(e) {
+					this.logger.localErr('Failed to execute task');
+					this.logger.localErr(e);
+				}
+
+				// Handle the continuation of the task command if needed
+				if(moreTasks && typeof moreTasks == 'function') {
+					task.func = moreTasks;
+				}
+				else{
+					this.taskQueue.splice(index, 1);
+				}
+
+				return true;
+			}
+		}
+
+		return false;
+
+	}
+
+	async execute(serverCache, message, userData) {
+
+		const params = message.content.split(' ');
+
+		const commandName = params[0];
+		params.splice(0, 1);
+
+		const data = {
+			author: message.author,
+			command_name: commandName,
+			params: params,
+			message: message,
+			commands: this.commands,
+			userdata: userData,
+			cache: serverCache
+		};
+
+		// Make sure no task is active for user, if so do it and break
+		if(await this.handleTask(message.author.id, message, data)) {
+			return;
+		}
+
+		if(!commandName.startsWith(serverCache.prefix)) return;
+		commandName.substring(serverCache.prefix.length);
+
+
+		// Find a command and execute it if every requirement is fulfilled
+		const isDM = message.channel.type == 'dm';
+		for(const command of this.commands) {
+			const description = command.description;
+			const settings = command.settings;
+
+			if(description.command.toLowerCase() !== commandName.toLowerCase()) {
+				continue;
+			}
+
+			if(params.length !== settings.requiredParams) {
+				this.logger.dmInvalidCommand(message.author.id, message.content, 'Usage - ' + serverCache.prefix + description.usage);
+				break;
+			}
+
+			if(isDM && !settings.allowDM) {
+				this.logger.dmInvalidCommand(message.author.id, message.content, 'This command does not allow DM\'s please use it on a server!');
+				break;
+			}
+
+			if(settings.requireProjectOwner === true && !userData.ownsProject) {
+				this.logger.dmInvalidCommand(message.author.id, message.content, 'You have to own a project to use this command');
+				break;
+			}
+
+			// Command identity matches to the one that is trying to executed, execute the command.
+			try{
+
+				const executeReturn = await command.execute(data);
+
+				if(settings.isTask == true) {
+					if(typeof executeReturn == 'function') {
+						this.addTask(message.author.id, message.channel.id, executeReturn, command);
+					}
+				}
+
+			}
+			catch(e) {
+				if(serverCache.testServer) {
+					this.logger.logErr('Failed to execute command: ' + settings.name, e);
+				}
+				this.logger.localErr('Failed to execute command:' + settings.name);
+				this.logger.localErr(e);
+
+				try{
+					message.channel.send('>Internal Server Error');
+				}
+				catch(d) {
+					this.logger.localErr('Failed to send internal server error message');
+					this.logger.localErr(d);
+				}
+			}
+		}
+
+	}
+
 }
 
 

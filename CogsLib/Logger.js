@@ -18,6 +18,13 @@ class Logger {
 		console.log(msg);
 	}
 
+	/**
+	* Used for constant debug messages
+	*/
+	localDebug(msg) {
+		console.log('[Debug] ' + msg);
+	}
+
 	localErr(msg, stacktrace = false) {
 		const errorMessage = 'Error: ' + msg;
 
@@ -38,8 +45,13 @@ class Logger {
 		}
 
 		// Generate embeded and log
+		const embed = this.generateMsg(title, msg, color);
 
+		this.logChannel.send(embed);
+	}
 
+	logErr(errMessage, details) {
+		this.log(errMessage, details, '#f5425d');
 	}
 
 	dm(recieverID, title, msg, color = '#fffff') {
