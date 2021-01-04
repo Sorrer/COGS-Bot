@@ -1,28 +1,49 @@
 const Discord = require('discord.js');
 
-// Will be provided by what ever requires a log;
-module.exports.server = false;
-module.exports.logChannel = false;
+const fs = require('fs');
 
+
+// Will be provided by what ever requires a log;
 
 class Logger {
 	constructor(data) {
+		this.localPrefix = '';
 		if(!data) return;
 
+		fs.mkdir('logs', function(err) {
+			if(err) {
+				console.log('Failed to create logs folder, no logs will be saved');
+			}
+		});
+
+		this.logFile = ('logs/' + data.server.id + '.log');
 		this.server = data.server;
 		this.logChannel = data.logChannel;
 		this.bot = data.bot;
+		this.localPrefix = data.prefix ? data.prefix : '[null]';
+
 	}
 
 	local(msg) {
-		console.log(msg);
+		console.log(this.localPrefix + msg);
+		fs.appendFile(this.logFile, this.localPrefix + msg + '\n', function(err) {
+			if(err) {
+				console.log('Failed to log to file');
+			}
+		});
 	}
 
 	/**
 	* Used for constant debug messages
 	*/
 	localDebug(msg) {
-		console.log('[Debug] ' + msg);
+		const finalMsg = this.localPrefix + '[Debug]' + msg;
+		console.log(finalMsg);
+		fs.appendFile(this.logFile, finalMsg + '\n', function(err) {
+			if(err) {
+				console.log('Failed to log to file');
+			}
+		});
 	}
 
 	localErr(msg, stacktrace = false) {
