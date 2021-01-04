@@ -17,9 +17,12 @@
   },
   "homepage": "",
   "dependencies": {
+    "@sendgrid/mail": "^7.4.0",
+    "crypto": "^1.0.1",
     "discord.js": "^12.2.0",
     "eslint": "^7.16.0",
     "mysql2": "^2.2.5",
+    "nodemailer": "^6.4.17",
     "walk-sync": "^2.2.0"
   },
   "nodemonConfig": {
