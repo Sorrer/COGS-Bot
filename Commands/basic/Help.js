@@ -57,19 +57,23 @@ module.exports = {
 		let helpString = '';
 
 		for(const category in data.commandscategorized) {
-			if(category != '' && category != null && category != undefined && category != 'undefined') {
-				helpString += '**' + category + '**\n';
-			}
-
+			let helpCommandsString = '';
 			for(const command of data.commandscategorized[category]) {
 				if(command.settings.privilege <= data.userdata.privilege) {
 					if(command.settings.onlyTestServer && (data.cache.getSetting && !data.cache.getSetting('istestserver'))) {
 						continue;
 					}
-
-					helpString += '> ' + command.description.usage + '\n';
+					helpCommandsString += '> ' + command.description.usage + '\n';
+					console.log(helpCommandsString);
 				}
 			}
+
+			if(category != '' && category != null && category != undefined && category != 'undefined') {
+				if(helpCommandsString != '') {
+					helpString += '**' + category + '**\n';
+				}
+			}
+			helpString += helpCommandsString;
 
 			helpString += '\n';
 		}
