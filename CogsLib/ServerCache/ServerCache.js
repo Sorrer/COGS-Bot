@@ -19,7 +19,6 @@ class ServerCache {
 
 		if(serverGuild === 'default') {
 			this.prefix = ';';
-			this.cleanCommands = true;
 			this.testServer = false;
 		}
 		else{
@@ -49,6 +48,19 @@ class ServerCache {
 		}
 
 		this.serverid = serverinfo.results[0].id;
+
+
+		// Get command prefix if available
+		const prefixResults = await this.mysqlCon.query('SELECT prefix FROM cogs.serverprefixes WHERE serverid = ?', [this.serverid]);
+
+		if(prefixResults.results[0]) {
+			this.prefix = prefixResults.results[0].prefix;
+		}
+		else{
+			this.prefix = ';';
+		}
+
+		this.logger.local('Server prefix: ' + ';');
 
 		this.logger.local('Server info retrieved. Server id = ' + this.serverid);
 
@@ -117,7 +129,16 @@ class ServerCache {
 
 	// TODO: Switch queries to prepared statements if bot gets too performant heavy for server
 
+
 	// Getters and Setters
+
+	async setPrefix(prefix) {
+
+		await this.mysqlCon.query('INSERT INTO cogs.serversettings (serverid, prefix) VALUES (?, ?) ON DUPLICATE KEY UPDATE prefix = ?', [this.serverid, prefix, prefix]);
+
+		this.prefix = prefix;
+	}
+
 	async setSetting(setting, value) {
 		if(typeof (value) != 'number' || typeof (setting) != 'string') {
 			this.logger.localErr('Can not update setting. Requires an integer for setting value, and a string for the setting name.', true);
@@ -140,7 +161,7 @@ class ServerCache {
 			return this.settings[setting];
 		}
 
-		const results = this.mysqlCon.query('SELECT value FROM cogs.serversettings WHERE serverid = ? AND setting = ?', [this.serverid, setting]);
+		const results = await this.mysqlCon.query('SELECT value FROM cogs.serversettings WHERE serverid = ? AND setting = ?', [this.serverid, setting]);
 
 		if(results.results[0]) {
 			this.settings[setting] = results.results[0].value;
@@ -153,6 +174,7 @@ class ServerCache {
 
 
 	async setChannel(tag, id) {
+		this.logger.local([this.serverid, id, tag, id]);
 		await this.mysqlCon.query('INSERT INTO cogs.serverchannels (serverid, channelid, tag) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE channelid = ?', [this.serverid, id, tag, id]);
 
 		this.channels[tag] = id;
