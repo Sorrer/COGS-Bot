@@ -4,8 +4,8 @@ module.exports = {
 
 		command: 'settestserver',
 		name: 'SetTestServer',
-		description: 'Sets the current server to the test server',
-		usage: 'setprefix <prefix> - Prefix to use before commands',
+		description: 'Sets the current server to the test server for the bot to test beta commands.',
+		usage: 'settestserver <prefix> - Defines the server as a test server.',
 		category: 'Bot Admin'
 
 	},
