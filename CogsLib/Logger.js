@@ -10,11 +10,12 @@ class Logger {
 		this.localPrefix = '';
 		if(!data) return;
 
-		fs.mkdir('logs', function(err) {
-			if(err) {
-				console.log('Failed to create logs folder, no logs will be saved');
-			}
-		});
+		if(fs.existsSync('logs')) {
+			this.useLogs = true;
+		}
+		else{
+			fs.mkdirSync('logs');
+		}
 
 		this.logFile = ('logs/' + data.server.id + '.log');
 		this.server = data.server;
@@ -24,30 +25,70 @@ class Logger {
 
 	}
 
+	async setLogChannel(channelid) {
+		if(this.server.id == null || this.bot == null) {
+			this.localDebug('Tried to set log channel without having a server guild set or a bot. This should not happen!');
+		}
+
+		const server = await this.bot.guilds.fetch(this.server.id);
+
+		if(server == null) {
+			this.localErr('Can not find server for setting log channel', true);
+		}
+
+		const channel = server.channels.resolve(channelid);
+		this.local('Log channel set - ' + channel.id);
+		this.logChannel = channel;
+	}
+
+	getDateTime() {
+
+		const date = new Date();
+
+		const year = date.getFullYear();
+		const month = date.getMonth();
+		const day = date.getDate();
+
+		let hour = date.getHours();
+		hour = (hour < 10 ? '0' : '') + hour;
+
+		let min = date.getMinutes();
+		min = (min < 10 ? '0' : '') + min;
+
+		let sec = date.getSeconds();
+		sec = (sec < 10 ? '0' : '') + sec;
+
+		return `[${year}-${month}-${day}][${hour}:${min}:${sec}]`;
+	}
+
+
+	saveLog(logMessage) {
+		if(this.useLogs) {
+			fs.appendFile(this.logFile, logMessage + '\n', function(err) {
+				if(err) {
+					console.log('Failed to log to file');
+				}
+			});
+		}
+	}
+
 	local(msg) {
-		console.log(this.localPrefix + msg);
-		fs.appendFile(this.logFile, this.localPrefix + msg + '\n', function(err) {
-			if(err) {
-				console.log('Failed to log to file');
-			}
-		});
+		const finalMsg = this.localPrefix + this.getDateTime() + ' ' + msg;
+		console.log(finalMsg);
+		this.saveLog(finalMsg);
 	}
 
 	/**
 	* Used for constant debug messages
 	*/
 	localDebug(msg) {
-		const finalMsg = this.localPrefix + '[Debug]' + msg;
+		const finalMsg = this.localPrefix + this.getDateTime() + '[Debug]' + ' ' + msg;
 		console.log(finalMsg);
-		fs.appendFile(this.logFile, finalMsg + '\n', function(err) {
-			if(err) {
-				console.log('Failed to log to file');
-			}
-		});
+		this.saveLog(finalMsg);
 	}
 
 	localErr(msg, stacktrace = false) {
-		const errorMessage = 'Error: ' + msg;
+		const errorMessage = '[Error]' + this.getDateTime() + ' ' + msg;
 
 		if(stacktrace) {
 			console.trace(errorMessage);
@@ -55,12 +96,16 @@ class Logger {
 		else{
 			console.log(errorMessage);
 		}
+
+
+		this.saveLog(errorMessage);
 	}
 
 	log(title, msg, color = '#fffff') {
+		this.saveLog(title);
+		this.saveLog(msg);
 
-		// If no server or logchannel is found
-		if(!this.server || !this.logChannel) {
+		if(!this.logChannel) {
 			console.log(title + color + '\n' + msg);
 			return;
 		}
@@ -68,14 +113,15 @@ class Logger {
 		// Generate embeded and log
 		const embed = this.generateMsg(title, msg, color);
 
-		this.logChannel.send(embed);
+		return this.logChannel.send(embed);
 	}
 
 	logErr(errMessage, details) {
 		this.log(errMessage, details, '#f5425d');
 	}
 
-	dm(recieverID, title, msg, color = '#fffff') {
+	dm(receiverID, title, msg, color = '#fffff', channelid = null, channelmsg = null) {
+
 		if(!this.bot) {
 			this.localErr('Failed to send DM, no bot found');
 			return;
@@ -83,14 +129,36 @@ class Logger {
 
 		const embed = this.generateMsg(title, msg, color);
 
-		this.bot.users.cache.fetch(recieverID).then((user) =>{
+		this.bot.users.cache.fetch(receiverID).then((user) =>{
 			user.send(embed);
+		}).catch((error1) => {
+			if(channelid != null) {
+				this.bot.channels.fetch(channelid).then((channel) =>{
+					if(channelmsg == null) {
+						channel.send('Could not send DM message to you (<@' + receiverID + '>). Make sure you are accepting DM\'s').then((message) =>{
+							setTimeout(() => {message.delete();}, 60000);
+						});
+					}
+					else{
+						channel.send(channelmsg);
+					}
+				}).catch((error2) => {
+					this.localErr(error1);
+					this.localErr(error2);
+				});
+			}
+			else{
+				this.localErr('No channel id provided, dm message went no where\n' + title + '\n' + msg, true);
+			}
 		});
+
+		this.saveLog('UserDM (' + receiverID + ') - ' + title);
+		this.saveLog(msg);
 	}
 
 
-	dmInvalidCommand(recieverID, theirMessage, msg) {
-		this.dm(recieverID, 'Error: Invalid Command', '*\'' + theirMessage + '\'*\n' + msg, '#f5425d');
+	dmInvalidCommand(recieverID, theirMessage, msg, channelid = null, channelmsg = null) {
+		this.dm(recieverID, 'Error: Invalid Command', '*\'' + theirMessage + '\'*\n' + msg, '#f5425d', channelid, channelmsg);
 	}
 
 	generateMsg(title, msg, color = '#fffff') {
