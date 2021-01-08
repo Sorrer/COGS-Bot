@@ -17,7 +17,7 @@ module.exports = {
 		allowedUsage: ['botadmin'],
 		requireProjectOwner: false,
 		requiredParams: 1,
-		allowDM: false,
+		allowDM: true,
 		onlyTestServer: false
 
 	},
