@@ -37,6 +37,7 @@ module.exports = {
 		// 'admin' is redudent, but it is good to show that admins can use this command. All commands will be accessible by admins.
 		// Usage can also go by privilege value, anything that has a greater value than the privilege specified will be able to use the command. Base privilege is 0 for everyone
 		// allowedUsage will be converted to the following privilege values after loading, so modifying will result in no changes.
+		// botadmin - MAX SAFE INTEGER privilege
 		// admin = 100 privilage
 		// moderation = 50 privilage
 		// user = 0 privilage
