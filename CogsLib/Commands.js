@@ -301,7 +301,7 @@ class Commands {
 			data.commander = this;
 		}
 
-		console.log(this.mask);
+		// console.log(this.mask);
 
 		if(this.mask[message.author.id] != null) {
 			data.userdata.privilege = this.mask[message.author.id];
