@@ -24,10 +24,10 @@ module.exports = {
 
 	execute: async function(data) {
 		const roleParam = data.params[0];
-		const privilege = data.params[1];
+		const privilege = parseInt(data.params[1], 10);
 
 		if(typeof (privilege) != 'number') {
-			data.cache.logger.dmInvalidCommand(data.message.author.id, data.message.content, 'Invalid Privilege Number. Check for double space', data.message.channel.id);
+			data.cache.logger.dmInvalidCommand(data.message.author.id, data.message.content, 'Invalid Privilege Number. Check for double space.', data.message.channel.id);
 			return;
 		}
 
