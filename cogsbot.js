@@ -73,28 +73,28 @@ client.on('message', async function(message) {
 		const serverCache = await serverCacheManager.get(message.channel.guild.id);
 
 		if(!message.content.startsWith(serverCache.prefix)) return;
-		// TODO: Get user data from database
 
 		const userdata = {};
 
 		if(config.discord.admins.includes(message.author.id)) {
 			userdata.privilege = Number.MAX_SAFE_INTEGER;
 		}
-		else{
+		else {
 
-			if(message.guild.ownerID === message.author.id) {
-				console.log('Found owner');
-
-			}
 
 			const roles = message.member.roles.cache.array();
 
 			const rolePrivilegeAmounts = [];
 
+			if(message.guild.ownerID === message.author.id) {
+				rolePrivilegeAmounts.push(999);
+			}
+
 			for(const role of roles) {
-				const privilege = serverCache.getRole(role);
+
+				const privilege = await serverCache.getRole(role.id);
 				if(privilege != null && typeof (privilege) == 'number') {
-					rolePrivilegeAmounts.add(privilege);
+					rolePrivilegeAmounts.push(privilege);
 				}
 			}
 
