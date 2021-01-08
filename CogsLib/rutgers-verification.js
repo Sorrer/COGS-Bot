@@ -3,7 +3,7 @@ const sgClient = require('@sendgrid/mail');
 const crypto = require('crypto');
 class Validator {
 	constructor(mysqlHandler, emailinfo, sendgrid = false) {
-		if(sendgrid && sendgrid.auth !== null) {
+		if(sendgrid) {
 			console.log('Using sendgrid');
 
 			this.client = sgClient;
@@ -11,6 +11,8 @@ class Validator {
 			this.client.isSendGrid = true;
 		}
 		else{
+			console.log('Using default mailer');
+
 			this.client = nodemailer.createTransport(emailinfo);
 		}
 
@@ -60,7 +62,7 @@ class Validator {
 		// return false if tries >= 5 < 10, ask them to resend. return 'resend';
 		// Set tries == 10, so they have another 5 tries.
 		// If they surpase that many tries return blocked, and ask them to see a e-board member return 'failed';
-		if(code === null) {
+		if(code == null) {
 			console.log('Failed to use code, invalid code');
 		}
 
