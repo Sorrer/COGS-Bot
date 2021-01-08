@@ -320,6 +320,10 @@ class Commands {
 
 		const command = this.commands[commandName];
 
+		if(command == null) {
+			return;
+		}
+
 		const description = command.description;
 		const settings = command.settings;
 
@@ -381,9 +385,13 @@ class Commands {
 			catch(d) {
 				this.logger.localErr('Failed to send internal server error message: ' + serverCache.serverGuild);
 				this.logger.localErr(d);
+				return false;
 			}
+
+			return false;
 		}
 
+		return true;
 
 	}
 
