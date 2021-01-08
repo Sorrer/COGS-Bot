@@ -25,10 +25,14 @@ class MysqlHandler {
 
 	async query(query, values, within = false) {
 		if(within !== true) {
-			// this.logger.localDebug('Executed non static query. Please use a default method.\n' + query);
+			this.logger.localDebug('Executed non static query. Please use a default method.\n' + query);
 		}
 
 		const [results, fields] = await this.connection.query(query, values);
+
+		if(!results) {
+			return { results: [], fields: [] };
+		}
 		return { results: results, fields: fields };
 	}
 

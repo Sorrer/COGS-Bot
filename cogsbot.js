@@ -41,6 +41,7 @@ const Verification = new Verifier(mysqlHandler, nodemail, sendgrid);
 async function Initiate() {
 	logger.localPrefix = '[main]';
 	logger.server = { id: 'main' };
+	logger.bot = client;
 
 	await mysqlHandler.init();
 	logger.local('Connected to MYSQL');
@@ -67,42 +68,54 @@ client.on('ready', function() {
 client.on('message', async function(message) {
 
 
-	const serverCache = await serverCacheManager.get(message.channel.guild.id);
+	if(message.channel.type == 'text') {
 
-	// TODO: Get user data from database
+		const serverCache = await serverCacheManager.get(message.channel.guild.id);
 
-	const userdata = {};
+		if(!message.content.startsWith(serverCache.prefix)) return;
+		// TODO: Get user data from database
 
-	if(config.discord.admins.includes(message.author.id)) {
-		userdata.privilege = Number.MAX_SAFE_INTEGER;
-	}
-	else{
-		const roles = message.member.roles.array();
-		const roleids = [];
-		for(const role of roles) {
-			roleids.push(role.id);
-		}
+		const userdata = {};
 
-		if(roleids.length === 0) {
-			userdata.privilege = 0;
+		if(config.discord.admins.includes(message.author.id)) {
+			userdata.privilege = Number.MAX_SAFE_INTEGER;
 		}
 		else{
-			userdata.privilege = Math.Max(...roleids);
+			const roles = message.member.roles.cache.array();
+			const roleids = [];
+			for(const role of roles) {
+				roleids.push(role.id);
+			}
+
+			if(roleids.length === 0) {
+				userdata.privilege = 0;
+			}
+			else{
+				userdata.privilege = Math.max(...roleids);
+			}
+		}
+
+
+		if(serverCache.getSetting('projectsenabled') == 1) {
+		// TODO: Check if user is project owner via cache, set userdata.
+		}
+
+		commandManager.execute(serverCache, message, userdata, client);
+
+		if(serverCache.getSetting('deleteinvoke') === 1) {
+			message.delete();
 		}
 	}
-
-
-	if(serverCache.getSetting('projectsenabled') == 1) {
-		// TODO: Check if user is project owner via cache, set userdata.
+	else{
+		const userdata = { privilege: 0 };
+		if(config.discord.admins.includes(message.author.id)) {
+			userdata.privilege = Number.MAX_SAFE_INTEGER;
+		}
+		commandManager.execute(null, message, userdata, client);
 	}
-
-	commandManager.execute(serverCache, message, userdata, client);
-
 
 	// Check if the server should delete messages when a command is executed.
-	if(serverCache.getSetting('deleteinvoke') === 1) {
-		message.delete();
-	}
+
 });
 
 client.on('guildMemberAdd', async function(member) {

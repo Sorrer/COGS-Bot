@@ -19,16 +19,32 @@ class Commands {
 	load() {
 		this.walkCommands(this.commands_folder);
 
+		// Categorize commands
+
+		this.commandCategorized = {};
+
+		for(const commandKey in this.commands) {
+
+			const category = this.commands[commandKey].description.category;
+
+			if(this.commandCategorized[category] == null) {
+				this.commandCategorized[category] = [];
+			}
+
+			this.commandCategorized[category].push(this.commands[commandKey]);
+		}
+
 		let loadedCommandNames = '';
 		let loadedMemberJoinCommandNames = '';
 
-		for(const command of this.commands) {
-			loadedCommandNames += command.description.name + ', ';
+		for(const command in this.commands) {
+			loadedCommandNames += command + ', ';
 		}
 
 		for(const command of this.memberJoinCommands) {
 			loadedMemberJoinCommandNames += command.description.name + ', ';
 		}
+
 
 		this.logger.local('Commands Loaded: ' + loadedCommandNames.replace(new RegExp(', $'), ''));
 		this.logger.local('Member Join Commands Loaded: ' + loadedMemberJoinCommandNames.replace(new RegExp(', $'), ''));
@@ -68,7 +84,8 @@ class Commands {
 		this.logger.local(`Loading Command: '${command.description.name}'`);
 
 		// Find lowest privilege to execute command
-		const privileges = [0];
+		// Max safe integer is bot admin;
+		const privileges = [Number.MAX_SAFE_INTEGER];
 
 		for(const role of command.settings.allowedUsage) {
 			if(typeof (role) == 'number') {
@@ -97,7 +114,7 @@ class Commands {
 			this.memberJoinCommands.push(command);
 		}
 
-		this.commands.push(command);
+		this.commands[command.description.command] = command;
 
 
 		this.logger.local(`Successfully loaded command: '${command.description.name}'\n`);
@@ -249,18 +266,23 @@ class Commands {
 
 	async execute(serverCache, message, userData, bot) {
 
-		this.localDebug(message.content);
 
 		const params = message.content.split(' ');
 
-		const commandName = params[0];
+		let commandName = params[0];
 		params.splice(0, 1);
+
+		// If there was no server cache found or supplied, set the default values;
+		if(serverCache == null) {
+			serverCache = { prefix: ';' };
+		}
 
 		const data = {
 			author: message.author,
 			bot: bot,
 			cache: serverCache,
 			commands: this.commands,
+			commandscategorized: this.commandsCategorized,
 			commandname: commandName,
 			message: message,
 			params: params,
@@ -273,68 +295,76 @@ class Commands {
 		}
 
 		if(!commandName.startsWith(serverCache.prefix)) return;
-		commandName.substring(serverCache.prefix.length);
+		commandName = commandName.substring(serverCache.prefix.length);
 
 
 		// Find a command and execute it if every requirement is fulfilled
 		const isDM = message.channel.type == 'dm';
-		for(const command of this.commands) {
-			const description = command.description;
-			const settings = command.settings;
 
-			if(description.command.toLowerCase() !== commandName.toLowerCase()) {
-				continue;
+		const command = this.commands[commandName];
+
+		const description = command.description;
+		const settings = command.settings;
+
+		if(description.command.toLowerCase() !== commandName.toLowerCase()) {
+			return;
+		}
+
+		if(params.length < settings.requiredParams) {
+			const invalidMessage = 'Usage - ' + serverCache.prefix + description.usage;
+			serverCache.logger.dmInvalidCommand(message.author.id, message.content, invalidMessage, message.channel.id, invalidMessage);
+			return;
+		}
+
+		if(isDM && !settings.allowDM) {
+			serverCache.logger.dmInvalidCommand(message.author.id, message.content, 'This command does not allow DM\'s please use it on a server!');
+			return;
+		}
+
+		if(settings.requireProjectOwner === true && !userData.ownsProject) {
+			const invalidMessage = 'You have to own a project to use this command';
+			serverCache.logger.dmInvalidCommand(message.author.id, message.content, invalidMessage, message.channel.id, invalidMessage, message.channinvalidMessage);
+			return;
+		}
+
+		if(settings.onlyTestServer === true && !serverCache.getSetting('istestserver')) {
+			return;
+		}
+
+		if(settings.privilege > userData.privilege) {
+			return;
+		}
+
+		console.log(settings.privilege);
+
+		// Command identity matches to the one that is trying to executed, execute the command.
+		try{
+
+			const executeReturn = await command.execute(data);
+
+			if(settings.isTask == true) {
+				if(typeof executeReturn == 'function') {
+					this.addTask(message.author.id, message.channel.id, executeReturn, command);
+				}
 			}
 
-			if(params.length !== settings.requiredParams) {
-				const invalidMessage = 'Usage - ' + serverCache.prefix + description.usage;
-				this.logger.dmInvalidCommand(message.author.id, message.content, invalidMessage, message.channel.id, invalidMessage);
-				return;
+		}
+		catch(e) {
+			if(serverCache.getSetting('istestserver')) {
+				serverCache.logger.logErr('Failed to execute command: ' + settings.name, e);
 			}
+			serverCache.logger.localErr('Failed to execute command:' + settings.name);
+			serverCache.logger.localErr(e);
 
-			if(isDM && !settings.allowDM) {
-				this.logger.dmInvalidCommand(message.author.id, message.content, 'This command does not allow DM\'s please use it on a server!');
-				return;
-			}
-
-			if(settings.requireProjectOwner === true && !userData.ownsProject) {
-				const invalidMessage = 'You have to own a project to use this command';
-				this.logger.dmInvalidCommand(message.author.id, message.content, invalidMessage, message.channel.id, invalidMessage, message.channinvalidMessage);
-				return;
-			}
-
-			if(settings.privilege < userData.privilege) {
-				return;
-			}
-
-			// Command identity matches to the one that is trying to executed, execute the command.
 			try{
-
-				const executeReturn = await command.execute(data);
-
-				if(settings.isTask == true) {
-					if(typeof executeReturn == 'function') {
-						this.addTask(message.author.id, message.channel.id, executeReturn, command);
-					}
-				}
-
+				message.channel.send('> Internal Server Error');
 			}
-			catch(e) {
-				if(serverCache.testServer) {
-					this.logger.logErr('Failed to execute command: ' + settings.name, e);
-				}
-				this.logger.localErr('Failed to execute command:' + settings.name);
-				this.logger.localErr(e);
-
-				try{
-					message.channel.send('>Internal Server Error');
-				}
-				catch(d) {
-					this.logger.localErr('Failed to send internal server error message');
-					this.logger.localErr(d);
-				}
+			catch(d) {
+				this.logger.localErr('Failed to send internal server error message: ' + serverCache.serverGuild);
+				this.logger.localErr(d);
 			}
 		}
+
 
 	}
 

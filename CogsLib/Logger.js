@@ -129,7 +129,7 @@ class Logger {
 
 		const embed = this.generateMsg(title, msg, color);
 
-		this.bot.users.cache.fetch(receiverID).then((user) =>{
+		this.bot.users.fetch(receiverID).then((user) =>{
 			user.send(embed);
 		}).catch((error1) => {
 			if(channelid != null) {

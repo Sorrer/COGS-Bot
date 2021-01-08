@@ -26,7 +26,7 @@ class ServerCacheManager {
 	async createCache(serverQueryResults) {
 		const logger = new Logger({
 			bot: this.bot,
-			prefix: serverQueryResults.guild,
+			prefix: '[' + serverQueryResults.guild + ']',
 			server: { id: serverQueryResults.guild }
 		});
 		const serverCache = new ServerCache(this.mysqlCon, logger, serverQueryResults.guild);
