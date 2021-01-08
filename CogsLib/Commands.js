@@ -7,14 +7,31 @@ class Commands {
 	constructor(commands_folder, logger) {
 		this.commands_folder = commands_folder;
 		this.commands = [];
+		this.memberJoinCommands = [];
 
 		this.logger = logger;
 
-		this.taskQueue = [];
+		this.taskQueue = {};
+
+
 	}
 
 	load() {
 		this.walkCommands(this.commands_folder);
+
+		let loadedCommandNames = '';
+		let loadedMemberJoinCommandNames = '';
+
+		for(const command of this.commands) {
+			loadedCommandNames += command.description.name + ', ';
+		}
+
+		for(const command of this.memberJoinCommands) {
+			loadedMemberJoinCommandNames += command.description.name + ', ';
+		}
+
+		this.logger.local('Commands Loaded: ' + loadedCommandNames.replace(new RegExp(', $', '')));
+		this.logger.local('Member Join Commands Loaded: ' + loadedMemberJoinCommandNames.replace(new RegExp(', $', '')));
 	}
 
 	walkCommands(dir) {
@@ -50,7 +67,38 @@ class Commands {
 
 		this.logger.local(`Loading Command: '${command.description.name}'`);
 
+		// Find lowest privilege to execute command
+		const privileges = [0];
+
+		for(const role of command.settings.allowedUsage) {
+			if(typeof (role) == 'number') {
+				privileges.push(parseInt(role, 10));
+			}
+			else{
+				switch(role) {
+				case 'admin':
+					privileges.push(100);
+					break;
+				case 'moderator':
+					privileges.push(50);
+					break;
+				case 'user':
+					privileges.push(0);
+					break;
+				}
+			}
+		}
+
+		command.settings.privilege = Math.min(...privileges);
+		this.logger.local('Command privilege: ' + command.settings.privilege);
+
+
+		if(command.onMemberJoin && typeof (command.onMemberJoin) == 'function') {
+			this.memberJoinCommands.push(command);
+		}
+
 		this.commands.push(command);
+
 
 		this.logger.local(`Successfully loaded command: '${command.description.name}'\n`);
 
@@ -62,7 +110,6 @@ class Commands {
 			return false;
 		}
 		else{
-			// TODO: Verify all settings requirements here
 			const settings = command.settings;
 			const errDescription = 'Failed to verify command settings - ';
 
@@ -153,46 +200,56 @@ class Commands {
 
 
 	addTask(clientID, channelID, function_, command, data = {}) {
-		this.taskQueue.push({ id: clientID, channel_id: channelID, execute: function_, command: command, data: data });
+		if(this.taskQueue[clientID] != null) {
+			clearTimeout(this.taskQueue[clientID].timeout);
+			delete this.taskQueue[clientID];
+		}
+
+		this.taskQueue[clientID] = { id: clientID, channel_id: channelID, execute: function_, command: command, data: data };
 		this.logger.localDebug(`Added new task for ${command.description.name}. ClientID - ${clientID}. ChannelID - ${channelID}`);
+
+		// Removes tasks after 5 minutes.
+		this.taskQueue[clientID].timeout = setTimeout(() => delete this.taskQueue[clientID], 300000);
 	}
 
 	async handleTask(clientID, message, data) {
-		for(let index = 0; index < this.taskQueue.length; index++) {
-			const task = this.taskQueue[index];
 
-			if(task.id === clientID) {
-				let moreTasks = false;
+		const task = this.taskQueue[clientID];
 
-				try{
-					if(message.content.toLowerCase() != 'c') {
-						if(task.command.settings.allowDM == (message.channel.type == 'dm') || message.channel.id == task.channel_id) {
-							moreTasks = await task.execute(data);
-						}
+		if(task) {
+			let moreTasks = false;
+
+			try{
+				if(message.content.toLowerCase() != 'c') {
+					if(task.command.settings.allowDM == (message.channel.type == 'dm') || message.channel.id == task.channel_id) {
+						moreTasks = await task.execute(data);
 					}
 				}
-				catch(e) {
-					this.logger.localErr('Failed to execute task');
-					this.logger.localErr(e);
-				}
-
-				// Handle the continuation of the task command if needed
-				if(moreTasks && typeof moreTasks == 'function') {
-					task.func = moreTasks;
-				}
-				else{
-					this.taskQueue.splice(index, 1);
-				}
-
-				return true;
 			}
+			catch(e) {
+				this.logger.localErr('Failed to execute task');
+				this.logger.localErr(e);
+			}
+
+			// Handle the continuation of the task command if needed
+			if(moreTasks && typeof (moreTasks) == 'function') {
+				task.func = moreTasks;
+			}
+			else{
+				delete this.taskQueue[clientID];
+			}
+
+			return true;
 		}
+
 
 		return false;
 
 	}
 
-	async execute(serverCache, message, userData) {
+	async execute(serverCache, message, userData, bot) {
+
+		this.localDebug(message.content);
 
 		const params = message.content.split(' ');
 
@@ -201,12 +258,13 @@ class Commands {
 
 		const data = {
 			author: message.author,
-			command_name: commandName,
-			params: params,
-			message: message,
+			bot: bot,
+			cache: serverCache,
 			commands: this.commands,
-			userdata: userData,
-			cache: serverCache
+			commandname: commandName,
+			message: message,
+			params: params,
+			userdata: userData
 		};
 
 		// Make sure no task is active for user, if so do it and break
@@ -229,18 +287,24 @@ class Commands {
 			}
 
 			if(params.length !== settings.requiredParams) {
-				this.logger.dmInvalidCommand(message.author.id, message.content, 'Usage - ' + serverCache.prefix + description.usage);
-				break;
+				const invalidMessage = 'Usage - ' + serverCache.prefix + description.usage;
+				this.logger.dmInvalidCommand(message.author.id, message.content, invalidMessage, message.channel.id, invalidMessage);
+				return;
 			}
 
 			if(isDM && !settings.allowDM) {
 				this.logger.dmInvalidCommand(message.author.id, message.content, 'This command does not allow DM\'s please use it on a server!');
-				break;
+				return;
 			}
 
 			if(settings.requireProjectOwner === true && !userData.ownsProject) {
-				this.logger.dmInvalidCommand(message.author.id, message.content, 'You have to own a project to use this command');
-				break;
+				const invalidMessage = 'You have to own a project to use this command';
+				this.logger.dmInvalidCommand(message.author.id, message.content, invalidMessage, message.channel.id, invalidMessage, message.channinvalidMessage);
+				return;
+			}
+
+			if(settings.privilege < userData.privilege) {
+				return;
 			}
 
 			// Command identity matches to the one that is trying to executed, execute the command.
@@ -272,6 +336,34 @@ class Commands {
 			}
 		}
 
+	}
+
+	async memberJoinEvent(data) {
+		const outputArr = [];
+
+		for(const command of this.memberJoinCommands) {
+
+			try{
+				const output = command.onMemberJoin(data);
+				if(output != null) outputArr.push(output);
+			}
+			catch(e) {
+				try{
+					this.logger.logError('Failed to execute memberJoin callback', 'Callback: (' + command.description.name + ')\n' + e);
+				}
+				catch(d) {
+					this.logger.localErr('Failed to send error to server for callback' + command.decsription.name) + '\n' + e;
+				}
+			}
+		}
+
+		let outputStr = '';
+
+		for(const output of outputArr) {
+			outputStr += '> ' + output + '\n';
+		}
+
+		this.logger.log('Member Joined - ' + data.member.user.username, 'Commands executed: \n' + outputStr, '#16c98d');
 	}
 
 }
