@@ -31,7 +31,7 @@ module.exports = {
 			const privilegeCount = parseInt(data.params[0], 10);
 			data.commander.mask[data.message.author.id] = privilegeCount;
 
-			await data.message.reply('You privilege is now set to ' + privilegeCount);
+			await data.message.reply('Your privilege is now set to ' + privilegeCount);
 		}
 	}
 };
