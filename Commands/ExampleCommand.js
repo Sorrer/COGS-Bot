@@ -23,7 +23,7 @@ module.exports = {
 
 
 		// The command loader will ignore this command unless enabled is set to true.
-		enabled: true,
+		enabled: false,
 
 		// Allows the command to go through multiple stages of messages through one single channel. ]
 		// If a message is recieved else where it will cancel this task.
@@ -32,7 +32,13 @@ module.exports = {
 
 		// Allow this command usage for these bot roles (not discord roles)
 		// 'admin' is redudent, but it is good to show that admins can use this command. All commands will be accessible by admins.
-		allowedUsage: ['admin', 'moderator', 'user'],
+		// Usage can also go by privilege value, anything that has a greater value than the privilege specified will be able to use the command. Base privilege is 0 for everyone
+		// allowedUsage will be converted to the following privilege values after loading, so modifying will result in no changes.
+		// admin = 100 privilage
+		// moderation = 50 privilage
+		// user = 0 privilage
+
+		allowedUsage: ['admin', 'moderator', 'user', 3, 2, 1],
 
 		// Command will only execute if the user is a project owner typing in their project chat.
 		requireProjectOwner: true,
@@ -51,7 +57,6 @@ module.exports = {
 
 		// This command will only execute on test server, for testing purposes
 		onlyTestServer: true
-
 	},
 
 	execute: async function(data) {
@@ -62,6 +67,7 @@ module.exports = {
 		// - author
 		// - params
 		// - message
+		// - bot
 		// - userdata (User data provided to the commands function)
 		//		- projectid (If this is )
 		// - cache
@@ -86,5 +92,20 @@ module.exports = {
 			logger.log('Data works!');
 		}
 		return;
+	},
+
+
+	onMemberJoin: async function(data) {
+
+		// data
+		// - cache
+		// - member (GuildMember)
+
+		if(!data) {
+			// Return null to not have any messages pushed out to log
+			return null;
+		}
+
+		return 'OnMemberJoinDebugMessage';
 	}
 };
