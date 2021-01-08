@@ -13,6 +13,7 @@ class Commands {
 
 		this.taskQueue = {};
 
+		this.mask = {};
 
 	}
 
@@ -296,6 +297,15 @@ class Commands {
 			userdata: userData
 		};
 
+		if(userData.privilege == Number.MAX_SAFE_INTEGER) {
+			data.commander = this;
+		}
+
+		if(this.mask[message.author.id]) {
+			data.userdata.privilege = this.mask[message.author.id];
+			userData = data.userdata;
+		}
+
 		// Make sure no task is active for user, if so do it and break
 		if(await this.handleTask(message.author.id, message, data)) {
 			return;
@@ -404,7 +414,6 @@ class Commands {
 
 		this.logger.log('Member Joined - ' + data.member.user.username, 'Commands executed: \n' + outputStr, '#16c98d');
 	}
-
 }
 
 
