@@ -134,7 +134,7 @@ class ServerCache {
 
 	async setPrefix(prefix) {
 
-		await this.mysqlCon.query('INSERT INTO cogs.serversettings (serverid, prefix) VALUES (?, ?) ON DUPLICATE KEY UPDATE prefix = ?', [this.serverid, prefix, prefix]);
+		await this.mysqlCon.query('INSERT INTO cogs.serverprefixes (serverid, prefix) VALUES (?, ?) ON DUPLICATE KEY UPDATE prefix = ?', [this.serverid, prefix, prefix]);
 
 		this.prefix = prefix;
 	}
@@ -204,6 +204,13 @@ class ServerCache {
 
 
 	async setRole(roleid, privilege) {
+		privilege = parseInt(privilege, 10);
+
+		if(privilege >= 1000) {
+			this.logger.logErr('Privilege value set too high! Can\'t use it, use a number lower than 1000');
+			return false;
+		}
+
 		await this.mysqlCon.query('INSERT INTO cogs.serverroles (serverid, roleid, privilege) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE privilege = ?', [this.serverid, roleid, privilege, privilege]);
 
 		this.roles[roleid] = privilege;
