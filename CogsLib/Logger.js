@@ -120,7 +120,7 @@ class Logger {
 		this.log(errMessage, details, '#f5425d');
 	}
 
-	dm(receiverID, title, msg, color = '#fffff', channelid = null, channelmsg = null) {
+	dm(receiverID, title, msg, color = '#ffffff', channelid = null, channelmsg = null) {
 
 		if(!this.bot) {
 			this.localErr('Failed to send DM, no bot found');
