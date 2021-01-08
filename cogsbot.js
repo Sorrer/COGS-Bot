@@ -39,11 +39,11 @@ const Verification = new Verifier(mysqlHandler, nodemail, sendgrid);
 // TestVerifier.sendVerification('alx3', 654321);
 
 async function Initiate() {
-	logger.local('Connected to MYSQL');
 	logger.localPrefix = '[main]';
 	logger.server = { id: 'main' };
 
 	await mysqlHandler.init();
+	logger.local('Connected to MYSQL');
 	Verification.mysqlHandler = mysqlHandler;
 
 
@@ -61,7 +61,7 @@ async function Initiate() {
 
 
 client.on('ready', function() {
-	this.logger.local('Bot connected');
+	logger.local('Bot connected');
 });
 
 client.on('message', async function(message) {
