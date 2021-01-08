@@ -5,7 +5,7 @@ module.exports = {
 		command: 'copypermissions',
 		name: 'CopyPermissions',
 		description: 'Copies permisions from one role to another role.',
-		usage: 'getpermissionbits <from> <to> - Copys permissions from role to role',
+		usage: 'copypermissions <from> <to> - Copys permissions from role to role',
 		category: 'Admin'
 
 	},
