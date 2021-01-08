@@ -21,18 +21,19 @@ class Commands {
 
 		// Categorize commands
 
-		this.commandCategorized = {};
+		this.commandsCategorized = {};
 
 		for(const commandKey in this.commands) {
 
 			const category = this.commands[commandKey].description.category;
 
-			if(this.commandCategorized[category] == null) {
-				this.commandCategorized[category] = [];
+			if(this.commandsCategorized[category] == null) {
+				this.commandsCategorized[category] = [];
 			}
 
-			this.commandCategorized[category].push(this.commands[commandKey]);
+			this.commandsCategorized[category].push(this.commands[commandKey]);
 		}
+
 
 		let loadedCommandNames = '';
 		let loadedMemberJoinCommandNames = '';
@@ -93,6 +94,9 @@ class Commands {
 			}
 			else{
 				switch(role) {
+				case 'botadmin':
+					privileges.push(Number.MAX_SAFE_INTEGER);
+					break;
 				case 'admin':
 					privileges.push(100);
 					break;
@@ -274,7 +278,10 @@ class Commands {
 
 		// If there was no server cache found or supplied, set the default values;
 		if(serverCache == null) {
-			serverCache = { prefix: ';' };
+			serverCache = {
+				prefix: ';',
+				logger: this.logger
+			};
 		}
 
 		const data = {
@@ -327,7 +334,7 @@ class Commands {
 			return;
 		}
 
-		if(settings.onlyTestServer === true && !serverCache.getSetting('istestserver')) {
+		if(settings.onlyTestServer === true && typeof (serverCache.getSetting) == 'function' && !serverCache.getSetting('istestserver')) {
 			return;
 		}
 
@@ -335,7 +342,6 @@ class Commands {
 			return;
 		}
 
-		console.log(settings.privilege);
 
 		// Command identity matches to the one that is trying to executed, execute the command.
 		try{
@@ -350,11 +356,14 @@ class Commands {
 
 		}
 		catch(e) {
-			if(serverCache.getSetting('istestserver')) {
-				serverCache.logger.logErr('Failed to execute command: ' + settings.name, e);
+			if(typeof (serverCache.getSetting) == 'function' && serverCache.getSetting('istestserver')) {
+				serverCache.logger.logErr('Failed to execute command: ' + description.name, e);
 			}
-			serverCache.logger.localErr('Failed to execute command:' + settings.name);
+			serverCache.logger.localErr('Failed to execute command: ' + description.name, false);
 			serverCache.logger.localErr(e);
+
+			// Get right to the problem
+			console.log(e);
 
 			try{
 				message.channel.send('> Internal Server Error');
