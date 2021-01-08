@@ -31,7 +31,7 @@ module.exports = {
 				for(const command of data.commandscategorized[category]) {
 					if(command.description.command === data.params[0].toLowerCase() || command.description.name == data.params[0]) {
 						if(data.userdata.privilege >= command.settings.privilege) {
-							helpString = command.description.usage + '\n' + '> ' + command.description.description;
+							helpString = command.description.usage + '\n' + '> ' + data.cache.prefix + command.description.description;
 							commandName = command.description.name;
 						}
 						break;
@@ -52,6 +52,8 @@ module.exports = {
 			data.message.channel.send(embededmsg);
 
 			return;
+
+			// TODO: If no command is found, check for category
 		}
 
 		let helpString = '';
@@ -63,7 +65,7 @@ module.exports = {
 					if(command.settings.onlyTestServer && (data.cache.getSetting && !data.cache.getSetting('istestserver'))) {
 						continue;
 					}
-					helpCommandsString += '> ' + command.description.usage + '\n';
+					helpCommandsString += '> ' + data.cache.prefix + command.description.usage + '\n';
 					// console.log(helpCommandsString);
 				}
 			}
