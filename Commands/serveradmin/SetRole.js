@@ -27,11 +27,13 @@ module.exports = {
 		const privilege = data.params[1];
 
 		if(typeof (privilege) != 'number') {
-			data.cache.logger.dmInvalidCommand(data.message.author.id, data.message.content, 'Invalid Privilege Number', data.message.channel.id);
+			data.cache.logger.dmInvalidCommand(data.message.author.id, data.message.content, 'Invalid Privilege Number. Check for double space', data.message.channel.id);
+			return;
 		}
 
 		if(privilege >= 1000) {
 			data.cache.logger.dmInvalidCommand(data.message.author.id, data.message.content, 'Invalid Privilege Number. Must be lower than 1000', data.message.channel.id);
+			return;
 		}
 
 		let role = data.message.mentions.roles.first();
