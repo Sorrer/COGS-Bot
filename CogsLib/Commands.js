@@ -301,7 +301,9 @@ class Commands {
 			data.commander = this;
 		}
 
-		if(this.mask[message.author.id]) {
+		console.log(this.mask);
+
+		if(this.mask[message.author.id] != null) {
 			data.userdata.privilege = this.mask[message.author.id];
 			userData = data.userdata;
 		}
@@ -331,6 +333,10 @@ class Commands {
 			return;
 		}
 
+		if(settings.privilege > userData.privilege && data.commander == null && description.name != 'maskprivilege') {
+			return;
+		}
+
 		if(params.length < settings.requiredParams) {
 			const invalidMessage = 'Usage - ' + serverCache.prefix + description.usage;
 			serverCache.logger.dmInvalidCommand(message.author.id, message.content, invalidMessage, message.channel.id, invalidMessage);
@@ -349,10 +355,6 @@ class Commands {
 		}
 
 		if(settings.onlyTestServer === true && typeof (serverCache.getSetting) == 'function' && !serverCache.getSetting('istestserver')) {
-			return;
-		}
-
-		if(settings.privilege > userData.privilege) {
 			return;
 		}
 

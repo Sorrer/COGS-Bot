@@ -25,14 +25,13 @@ module.exports = {
 	execute: async function(data) {
 		if(data.params[0] == 'off') {
 			delete data.commander.mask[data.message.author.id];
-			data.message.reply('Your mask is now off');
+			await data.message.reply('Your mask is now off');
 		}
 		else{
-
 			const privilegeCount = parseInt(data.params[0], 10);
 			data.commander.mask[data.message.author.id] = privilegeCount;
 
-			data.message.reply('You privilege is now set to ' + privilegeCount);
+			await data.message.reply('You privilege is now set to ' + privilegeCount);
 		}
 	}
 };
