@@ -39,10 +39,11 @@ const Verification = new Verifier(mysqlHandler, nodemail, sendgrid);
 // TestVerifier.sendVerification('alx3', 654321);
 
 async function Initiate() {
-	await mysqlHandler.init();
 	logger.local('Connected to MYSQL');
 	logger.localPrefix = '[main]';
 	logger.server = { id: 'main' };
+
+	await mysqlHandler.init();
 	Verification.mysqlHandler = mysqlHandler;
 
 
@@ -60,7 +61,7 @@ async function Initiate() {
 
 
 client.on('ready', function() {
-	this.logger.log('Bot connected');
+	this.logger.local('Bot connected');
 });
 
 client.on('message', async function(message) {
@@ -92,7 +93,7 @@ client.on('message', async function(message) {
 
 
 	if(serverCache.getSetting('projectsenabled') == 1) {
-
+		// TODO: Check if user is project owner via cache, set userdata.
 	}
 
 	commandManager.execute(serverCache, message, userdata, client);
