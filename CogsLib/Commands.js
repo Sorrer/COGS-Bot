@@ -30,8 +30,8 @@ class Commands {
 			loadedMemberJoinCommandNames += command.description.name + ', ';
 		}
 
-		this.logger.local('Commands Loaded: ' + loadedCommandNames.replace(new RegExp(', $', '')));
-		this.logger.local('Member Join Commands Loaded: ' + loadedMemberJoinCommandNames.replace(new RegExp(', $', '')));
+		this.logger.local('Commands Loaded: ' + loadedCommandNames.replace(new RegExp(', $'), ''));
+		this.logger.local('Member Join Commands Loaded: ' + loadedMemberJoinCommandNames.replace(new RegExp(', $'), ''));
 	}
 
 	walkCommands(dir) {
