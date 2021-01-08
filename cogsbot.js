@@ -81,17 +81,29 @@ client.on('message', async function(message) {
 			userdata.privilege = Number.MAX_SAFE_INTEGER;
 		}
 		else{
-			const roles = message.member.roles.cache.array();
-			const roleids = [];
-			for(const role of roles) {
-				roleids.push(role.id);
+
+			if(message.guild.ownerID === message.author.id) {
+				console.log('Found owner');
+
 			}
 
-			if(roleids.length === 0) {
+			const roles = message.member.roles.cache.array();
+
+			const rolePrivilegeAmounts = [];
+
+			for(const role of roles) {
+				const privilege = serverCache.getRole(role);
+				if(privilege != null && typeof (privilege) == 'number') {
+					rolePrivilegeAmounts.add(privilege);
+				}
+			}
+
+
+			if(rolePrivilegeAmounts.length === 0) {
 				userdata.privilege = 0;
 			}
 			else{
-				userdata.privilege = Math.max(...roleids);
+				userdata.privilege = Math.max(...rolePrivilegeAmounts);
 			}
 		}
 
