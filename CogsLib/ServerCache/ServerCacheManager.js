@@ -50,8 +50,8 @@ class ServerCacheManager {
 		const result = await this.mysqlCon.query('SELECT * FROM cogs.servers WHERE guild = ?', [serverguild]);
 
 
-		await this.createCache(result);
-		this.logger.local('New server cache created! ' + result.guild);
+		await this.createCache(result.results[0]);
+		this.logger.local('New server cache created! ' + result.results[0].guild);
 
 
 		return this.caches[result.guild];
