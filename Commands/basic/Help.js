@@ -64,7 +64,7 @@ module.exports = {
 						continue;
 					}
 					helpCommandsString += '> ' + command.description.usage + '\n';
-					console.log(helpCommandsString);
+					// console.log(helpCommandsString);
 				}
 			}
 
