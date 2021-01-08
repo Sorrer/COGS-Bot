@@ -14,7 +14,10 @@ module.exports = {
 		description: 'This command is used as a template for future commands',
 
 		// Explain how the command should be used, free form on how to explain.
-		usage: 'test <param1> <param2> <param3> - Param1 should be this. Param2 is this. Param3 is optional'
+		usage: 'test <param1> <param2> <param3> - Param1 should be this. Param2 is this. Param3 is optional',
+
+		// Optional description field to set where this command will be placed in the help list
+		category: 'Example'
 
 	},
 
