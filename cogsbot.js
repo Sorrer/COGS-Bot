@@ -3,27 +3,28 @@ const Logger = require('./CogsLib/Logger.js');
 const Discord = require('discord.js');
 const MysqlHandler = require('./CogsLib/MysqlHandler.js');
 
+const ServerCacheManager = require('./CogsLib/ServerCache/ServerCacheManager.js');
+
 const config = require('./config.json');
 
 const logger = new Logger({ server: { id: 'test' } });
 // const bot = new Discord.Client();
 
-const command = new CommandManager('./Commands', logger);
-
-
-// TODO: Add mysql functionality
-// TODO: Add servercaching system. Each server has its own serverCache that can be reloaded and loaded. Have a system that detects what serverCache to used based on discord message. If the message is a DM use default functionality
+const commandManager = new CommandManager('./Commands', logger);
 
 
 // Mysql Handler
 const mysqlHandler = new MysqlHandler(config.mysql, logger);
 
 
+// Discord ClientID
+const client = new Discord.Client();
+
 // Verifier
 
 const Verifier = require ('./CogsLib/rutgers-verification.js');
 
-let nodemail = null, sendgrid = null;
+let nodemail = null, sendgrid = null, serverCacheManager = null;
 
 if(config.email.sendGrid.api_key) {
 	sendgrid = config.email.sendGrid.api_key;
@@ -40,30 +41,74 @@ const Verification = new Verifier(mysqlHandler, nodemail, sendgrid);
 async function Initiate() {
 	await mysqlHandler.init();
 	logger.local('Connected to MYSQL');
+	logger.localPrefix = '[main]';
+	logger.server = { id: 'main' };
 	Verification.mysqlHandler = mysqlHandler;
 
-	logger.local(Verification.startVerification('123', 'alx3'));
 
-	const response = await askQuestion('Enter verification code');
+	await client.login(config.bot.token);
+	serverCacheManager = new ServerCacheManager(mysqlHandler, logger, client);
+	await serverCacheManager.loadAll();
 
-	logger.local(Verification.verify('123', 'alx3', response));
+	console.log('Trying to get');
 
-	command.load();
+	// console.log(await serverCacheManager.get('100'));
+	// console.log(await serverCacheManager.get('100'));
+
+	commandManager.load();
 }
 
 
-const readline = require('readline');
+client.on('ready', function() {
+	this.logger.log('Bot connected');
+});
 
-function askQuestion(query) {
-	const rl = readline.createInterface({
-		input: process.stdin,
-		output: process.stdout
-	});
+client.on('message', async function(message) {
 
-	return new Promise(resolve => rl.question(query, ans => {
-		rl.close();
-		resolve(ans);
-	}));
-}
+
+	const serverCache = await serverCacheManager.get(message.channel.guild.id);
+
+	// TODO: Get user data from database
+
+	const userdata = {};
+
+	if(config.discord.admins.includes(message.author.id)) {
+		userdata.privilege = Number.MAX_SAFE_INTEGER;
+	}
+	else{
+		const roles = message.member.roles.array();
+		const roleids = [];
+		for(const role of roles) {
+			roleids.push(role.id);
+		}
+
+		if(roleids.length === 0) {
+			userdata.privilege = 0;
+		}
+		else{
+			userdata.privilege = Math.Max(...roleids);
+		}
+	}
+
+
+	if(serverCache.getSetting('projectsenabled') == 1) {
+
+	}
+
+	commandManager.execute(serverCache, message, userdata, client);
+
+
+	// Check if the server should delete messages when a command is executed.
+	if(serverCache.getSetting('deleteinvoke') === 1) {
+		message.delete();
+	}
+});
+
+client.on('guildMemberAdd', async function(member) {
+	const serverCache = await serverCacheManager.get(member.guild.id);
+
+	await commandManager.memberJoinEvent({ cache: serverCache });
+});
+
 
 Initiate();
