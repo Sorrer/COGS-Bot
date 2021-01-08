@@ -158,7 +158,7 @@ class Logger {
 
 
 	dmInvalidCommand(recieverID, theirMessage, msg, channelid = null, channelmsg = null) {
-		this.dm(recieverID, 'Error: Invalid Command', '*\'' + theirMessage + '\'*\n' + msg, '#f5425d', channelid, channelmsg);
+		this.dm(recieverID, 'Error: Invalid Command', '*> ' + theirMessage + '*\n' + msg, '#f5425d', channelid, channelmsg);
 	}
 
 	generateMsg(title, msg, color = '#fffff') {
