@@ -298,6 +298,8 @@ class Projects {
 				await message.delete();
 			}
 		}
+
+		await this.cache.mysqlCon.query('DELETE FROM cogsprojects.listings WHERE projectid = ? AND serverid = ?', [projectid, this.cache.serverid]);
 	}
 
 	async addMember(projectid, userid) {
