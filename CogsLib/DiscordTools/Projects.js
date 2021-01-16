@@ -269,7 +269,7 @@ class Projects {
 		const embed = await this.generateProjectEmbed(projectid);
 
 		const projectListing = await this.cache.mysqlCon.query('SELECT messageid FROM cogsprojects.listings WHERE projectid = ? AND serverid = ?', [projectid, this.cache.serverid]);
-
+		console.log(projectListing);
 		if(projectListing.results[0] != null) {
 			const message = await this.projectListingChannel.messages.fetch(projectListing.results[0].messageid);
 
@@ -301,6 +301,17 @@ class Projects {
 		}
 
 		await this.cache.mysqlCon.query('DELETE FROM cogsprojects.listings WHERE projectid = ? AND serverid = ?', [projectid, this.cache.serverid]);
+	}
+
+	async hasMember(projectid, userid) {
+		const project = await this.get(projectid);
+		if(project == null) return null;
+
+		if(project.ownerid == userid || project.memberids.includes(userid)) return true;
+
+
+		return false;
+
 	}
 
 	async addMember(projectid, userid) {

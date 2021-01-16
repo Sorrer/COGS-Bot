@@ -33,10 +33,14 @@ module.exports = {
 
 		const id = parseInt(data.params[0], 10);
 		if(await data.cache.projects.has(id)) {
+			if(data.cache.projects.hasMember(id, data.author.id)) {
+				await data.message.reply('Already part of project!');
+				return;
+			}
 			await data.cache.projects.addMember(id, data.author.id);
 		}
 		else{
-			data.message.reply('Could not find project id!');
+			await data.message.reply('Could not find project id!');
 		}
 	},
 
