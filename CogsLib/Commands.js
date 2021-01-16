@@ -411,7 +411,7 @@ class Commands {
 		for(const command of this.memberJoinCommands) {
 
 			try{
-				const output = command.onMemberJoin(data);
+				const output = await command.onMemberJoin(data);
 				if(output != null) outputArr.push(output);
 			}
 			catch(e) {
