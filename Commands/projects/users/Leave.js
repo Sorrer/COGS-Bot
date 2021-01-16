@@ -18,7 +18,7 @@ module.exports = {
 		requireProjectOwner: false,
 		requiredParams: 0,
 		allowDM: false,
-		onlyTestServer: true
+		onlyTestServer: false
 
 	},
 
