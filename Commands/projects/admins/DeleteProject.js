@@ -48,7 +48,7 @@ module.exports = {
 		if(data.message.content == 'y') {
 			data.message.reply('Deleting project');
 			await data.cache.projects.delete(taskData['projectid']);
-			data.message.reply('Project delete');
+			data.message.reply('Project deleted');
 		}
 
 	}
