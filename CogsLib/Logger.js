@@ -102,12 +102,14 @@ class Logger {
 	}
 
 	log(title, msg, color = '#fffff') {
-		this.saveLog(title);
-		this.saveLog(msg);
 
 		if(!this.logChannel) {
-			console.log(title + color + '\n' + msg);
+			this.local(title + color + '\n' + msg);
 			return;
+		}
+		else{
+			this.saveLog(title);
+			this.saveLog(msg);
 		}
 
 		// Generate embeded and log
