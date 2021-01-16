@@ -185,6 +185,8 @@ class Projects {
 		// Setup cache
 		await this.generateProjectData(projectid);
 
+		await this.updateProjectListing(projectid);
+
 		await this.cache.logger.log('Successfully Created Project', `Project **${name}** created!\nOwner: <@${ownerid}>\nDescription:\n> ${info}\nID: ${projectid}`);
 
 		return projectid;
@@ -237,7 +239,6 @@ class Projects {
 
 		this.projects[projectid].channelids.push(newChannel.id);
 
-		await this.updateProjectListing(projectid);
 
 		await this.cache.logger.log('Created channel for project', 'Created channel <#' + newChannel.id + '> for project ' + this.projects[projectid].title);
 
