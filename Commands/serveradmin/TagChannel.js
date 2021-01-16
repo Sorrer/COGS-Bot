@@ -4,7 +4,7 @@ module.exports = {
 
 		command: 'tagchannel',
 		name: 'TagChannel',
-		description: 'Tags a channel. If channel is not supplied, it will use current channel. Used with bot subsystems. For example tagging a channel with logchannel sets the channel as logchannel for the bot to output to',
+		description: 'Tags a channel. If channel is not supplied, it will use current channel. Used with bot subsystems. For example tagging a channel with logchannel sets the channel as logchannel for the bot to output to. Also can tag categories.\n-- **Tags** --\n> logchannel - Channel that bot logs to\n> projects - (CATEGORY) Enables project creations. All main project channels will be put here.\n> projectlistings - Projects information will be posted by the bot here\n> archive - (CATEGORY) Any bot delete channels will be put here.',
 		usage: 'tagchannel <tag> <channelid> - tags the specified channel with specific tag.',
 		category: 'Admin'
 	},
@@ -25,7 +25,7 @@ module.exports = {
 
 		const message = data.message;
 		let channelid = null;
-		const tag = data.params[0];
+		const tag = data.params[0].toLowerCase();
 
 		const logger = data.cache.logger;
 
@@ -36,7 +36,7 @@ module.exports = {
 
 			if(mentionChannel == null) {
 
-				mentionChannel = message.guild.resolve(data.params[1]);
+				mentionChannel = message.guild.channels.resolve(data.params[1]);
 
 				if(mentionChannel == null) {
 					await message.reply('Could not find channel! Please use the id of the channel, or mention the channel as your second parameter');
@@ -44,17 +44,24 @@ module.exports = {
 				}
 
 			}
-			else{
-				channelid = mentionChannel;
-			}
+			channelid = mentionChannel;
 		}
 		else{
-			channelid = message.channel.id.id;
+			channelid = message.channel.id;
 		}
 
 		// Check if channel exists
 		const channelCheck = message.guild.channels.resolve(channelid);
 		channelid = message.guild.channels.resolveID(channelid);
+
+		switch(tag) {
+		case 'archive':
+		case 'projects':
+			if(channelCheck.type != 'category') {
+				await message.reply('This tag requires the channel to be a category! Doing nothing.');
+				return;
+			}
+		}
 
 		if(channelCheck != null) {
 			await data.cache.setChannel(tag, channelid);
