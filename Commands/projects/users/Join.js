@@ -45,11 +45,19 @@ module.exports = {
 
 		let projectTitles = '';
 
-		for(const project of data.cache.projects.projects) {
-			if(project.ownerid == data.member.id || project.memberids.includes(data.member.id)) {
-				found = true;
-				data.cache.projects.addMember(project.id, data.member.id);
-				projectTitles += '\'*' + project.title + '*\' ';
+
+		const projectsResults = await data.cache.mysqlCon.query('SELECT projectid FROM cogsprojects.projects WHERE serverid = ?', [data.cache.serverid]);
+
+		if(projectsResults.results[0] != null) {
+			for(const result of projectsResults.results) {
+				const project = await data.cache.projects.get(result.projectid);
+
+
+				if(project.ownerid == data.member.id || project.memberids.includes(data.member.id)) {
+					found = true;
+					await data.cache.projects.addMember(project.id, data.member.id);
+					projectTitles += '\'*' + project.title + '*\' ';
+				}
 			}
 		}
 
