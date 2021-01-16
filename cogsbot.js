@@ -72,7 +72,7 @@ client.on('message', async function(message) {
 
 		const serverCache = await serverCacheManager.get(message.channel.guild.id);
 
-		if(!message.content.startsWith(serverCache.prefix)) return;
+		if(!message.content.startsWith(serverCache.prefix) && !commandManager.hasTask(message.author.id)) return;
 
 		const userdata = {};
 
@@ -109,7 +109,7 @@ client.on('message', async function(message) {
 
 
 		if(serverCache.getSetting('projectsenabled') == 1) {
-		// TODO: Check if user is project owner via cache, set userdata.
+		// TODO: Check if user is project owner via cache, set userdata. Maybe have this work inside commands instead, so it will only be retrieved when required. Maybe not though.
 		}
 
 		commandManager.execute(serverCache, message, userdata, client);
