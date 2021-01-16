@@ -5,13 +5,18 @@
 // Log channel
 // Project Listing Channel
 
+const ChannelTools = require('../DiscordTools/ChannelTools.js');
+const Projects = require('../DiscordTools/Projects.js');
+
+
 class ServerCache {
-	constructor(mysqlCon, logger, serverGuild = 'default') {
+	constructor(mysqlCon, logger, serverGuild = 'default', bot = null) {
 		this.mysqlCon = mysqlCon;
 		this.serverGuild = serverGuild;
 
 		this.logger = logger;
 
+		this.bot = bot;
 
 		this.channels = {};
 		this.settings = {};
@@ -49,6 +54,8 @@ class ServerCache {
 
 		this.serverid = serverinfo.results[0].id;
 
+		this.guild = await this.bot.guilds.fetch(this.serverGuild);
+
 
 		// Get command prefix if available
 		const prefixResults = await this.mysqlCon.query('SELECT prefix FROM cogs.serverprefixes WHERE serverid = ?', [this.serverid]);
@@ -65,7 +72,17 @@ class ServerCache {
 		this.logger.local('Server info retrieved. Server id = ' + this.serverid);
 
 		await this.loadSettings();
+
+		await this.loadTools();
 		await this.loadChannels();
+
+
+	}
+
+	async loadTools() {
+		this.channeltools = new ChannelTools(this);
+		this.projects = new Projects(this);
+		await this.projects.init();
 
 	}
 
@@ -124,6 +141,12 @@ class ServerCache {
 		case 'logchannel':
 			await this.logger.setLogChannel(channelid);
 			break;
+		case 'projectlistings':
+			await this.projects.setProjectListingChannel(channelid);
+			break;
+		case 'projects':
+			await this.projects.setProjectsCategory(channelid);
+			break;
 		}
 	}
 
@@ -168,6 +191,7 @@ class ServerCache {
 			return results.results[0].value;
 		}
 		else{
+			this.settings[setting] = 0;
 			return null;
 		}
 	}
