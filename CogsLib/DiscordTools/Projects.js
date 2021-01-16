@@ -99,6 +99,7 @@ class Projects {
 		}
 
 		const project = {
+			id: projectid,
 			title: projectInfo.results[0].title,
 			description: projectInfo.results[0].description,
 			ownerid: projectInfo.results[0].ownerid,

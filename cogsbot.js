@@ -133,7 +133,7 @@ client.on('message', async function(message) {
 client.on('guildMemberAdd', async function(member) {
 	const serverCache = await serverCacheManager.get(member.guild.id);
 
-	await commandManager.memberJoinEvent({ cache: serverCache });
+	await commandManager.memberJoinEvent({ member: member, cache: serverCache });
 });
 
 
