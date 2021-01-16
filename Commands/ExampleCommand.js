@@ -90,12 +90,12 @@ module.exports = {
 
 	},
 
-	task: async function(data) {
+	task: async function(data, taskData) {
 		if(data && data.tools.logger) {
 			const logger = data.tools.logger;
 			logger.log('Data works!');
 		}
-		return;
+		return taskData;
 	},
 
 
