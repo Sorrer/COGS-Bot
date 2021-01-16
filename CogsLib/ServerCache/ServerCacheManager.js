@@ -29,7 +29,7 @@ class ServerCacheManager {
 			prefix: '[' + serverQueryResults.guild + ']',
 			server: { id: serverQueryResults.guild }
 		});
-		const serverCache = new ServerCache(this.mysqlCon, logger, serverQueryResults.guild);
+		const serverCache = new ServerCache(this.mysqlCon, logger, serverQueryResults.guild, this.bot);
 
 		this.caches[serverQueryResults.guild] = serverCache;
 	}
