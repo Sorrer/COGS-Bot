@@ -258,6 +258,7 @@ class Commands {
 			catch(e) {
 				this.logger.localErr('Failed to execute task');
 				this.logger.localErr(e, true);
+				this.logger.localErr(e.stacktrace);
 			}
 
 			// Handle the continuation of the task command if needed
