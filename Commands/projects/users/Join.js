@@ -33,7 +33,7 @@ module.exports = {
 
 		const id = parseInt(data.params[0], 10);
 		if(await data.cache.projects.has(id)) {
-			if(data.cache.projects.hasMember(id, data.author.id)) {
+			if(await data.cache.projects.hasMember(id, data.author.id)) {
 				await data.message.reply('Already part of project!');
 				return;
 			}

@@ -253,7 +253,7 @@ class Projects {
 
 		await this.cache.channeltools.deleteChannel(channelid);
 
-		this.projects[projectid].filter((item) => item !== channelid);
+		this.projects[projectid].channelids = this.projects[projectid].channelids.filter((item) => item !== channelid);
 
 
 		await this.cache.logger.log('Delete channel for project', 'Delete channel <#' + channelid + '> for project ' + this.projects[projectid].title);
@@ -269,19 +269,22 @@ class Projects {
 		const embed = await this.generateProjectEmbed(projectid);
 
 		const projectListing = await this.cache.mysqlCon.query('SELECT messageid FROM cogsprojects.listings WHERE projectid = ? AND serverid = ?', [projectid, this.cache.serverid]);
-		console.log(projectListing);
 		if(projectListing.results[0] != null) {
-			const message = await this.projectListingChannel.messages.fetch(projectListing.results[0].messageid);
-
-			if(message != null) {
-				await message.edit(embed);
-				return;
+			try{
+				const message = await this.projectListingChannel.messages.fetch(projectListing.results[0].messageid);
+				if(message != null) {
+					await message.edit(embed);
+					return;
+				}
+			}
+			catch(e) {
+				//
 			}
 		}
 
 		const sentMessage = await this.projectListingChannel.send(embed);
 
-		await this.cache.mysqlCon.query('INSERT INTO cogsprojects.listings (serverid, projectid, messageid) VALUES (?,?,?)', [this.cache.serverid, projectid, sentMessage.id]);
+		await this.cache.mysqlCon.query('INSERT INTO cogsprojects.listings (serverid, projectid, messageid) VALUES (?,?,?) ON DUPLICATE KEY UPDATE messageid = ? ', [this.cache.serverid, projectid, sentMessage.id, sentMessage.id]);
 
 	}
 
@@ -317,6 +320,7 @@ class Projects {
 	async addMember(projectid, userid) {
 		const project = await this.get(projectid);
 		if(project == null) return;
+
 		const isOwner = project.ownerid == userid;
 
 		await this.cache.channeltools.addProjectUser(project.textchannelid, userid, isOwner);
@@ -328,6 +332,15 @@ class Projects {
 
 		const textchannel = await this.cache.guild.channels.resolve(project.textchannelid);
 
+
+		if(!isOwner) {
+			await this.cache.mysqlCon.query('INSERT INTO cogsprojects.members (serverid, projectid, memberid) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE memberid = ?', [this.cache.serverid, projectid, userid, userid]);
+
+			if(!project.memberids.includes(userid)) {
+				project.memberids.push(userid);
+			}
+
+		}
 
 		await textchannel.send('<@' + userid + '> has joined the project!');
 		await this.cache.logger.log('User joined project', '<@' + userid + '> joined *' + project.title + '*', '#00ed04');
@@ -344,6 +357,18 @@ class Projects {
 		for(const channelid of project.channelids) {
 			await this.cache.channeltools.removeUserChannelPermissions(channelid, userid);
 		}
+
+		await this.cache.mysqlCon.query('DELETE FROM cogsprojects.members WHERE serverid = ? AND projectid = ? AND memberid = ?', [this.cache.serverid, projectid, userid]);
+
+		console.log(project.memberids + ' waut');
+
+		project.memberids = project.memberids.filter((item) => {
+			console.log(item != userid);
+			return item != userid;
+
+		});
+
+		console.log(project.memberids);
 
 		const textchannel = await this.cache.guild.channels.resolve(project.textchannelid);
 		await textchannel.send('<@' + userid + '> has left the project.');

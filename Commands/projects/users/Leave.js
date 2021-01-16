@@ -26,10 +26,18 @@ module.exports = {
 		const id = parseInt(data.params[0], 10);
 		if(await data.cache.projects.has(id)) {
 			const project = await data.cache.projects.get(id);
+
+
 			if(project.ownerid == data.author.id) {
 				data.message.reply('Cannot leave a project that you own!');
 				return;
 			}
+
+			if(!project.memberids.includes(data.author.id)) {
+				data.message.reply('You are not in that project');
+				return;
+			}
+
 			await data.cache.projects.removeMember(id, data.author.id);
 		}
 		else{
