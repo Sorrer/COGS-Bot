@@ -60,7 +60,7 @@ class Projects {
 
 		embed.addFields(
 			{ name: 'Owner', value: '<@' + project.ownerid + '>', inline: true },
-			{ name : 'Members', value: project.memberids.length, inline: true },
+			{ name : 'Members', value: project.memberids.length + 1, inline: true },
 			{ name: 'ID', value: projectid, inline: true }
 		);
 
@@ -320,6 +320,7 @@ class Projects {
 
 		await textchannel.send('<@' + userid + '> has joined the project!');
 		await this.cache.logger.log('User joined project', '<@' + userid + '> joined *' + project.title + '*', '#00ed04');
+		await this.updateProjectListing(projectid);
 	}
 
 	async removeMember(projectid, userid) {
@@ -336,6 +337,7 @@ class Projects {
 		const textchannel = await this.cache.guild.channels.resolve(project.textchannelid);
 		await textchannel.send('<@' + userid + '> has left the project.');
 		await this.cache.logger.log('User left project', '<@' + userid + '> left *' + project.title + '*', '#ff1974');
+		await this.updateProjectListing(projectid);
 	}
 
 }
