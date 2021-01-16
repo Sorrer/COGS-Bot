@@ -227,11 +227,15 @@ class Commands {
 			delete this.taskQueue[clientID];
 		}
 
-		this.taskQueue[clientID] = { id: clientID, channel_id: channelID, execute: function_, command: command, data: data };
+		this.taskQueue[clientID] = { id: clientID, channel_id: channelID, execute: function_, command: command, data: data, persistant_data: {} };
 		this.logger.localDebug(`Added new task for ${command.description.name}. ClientID - ${clientID}. ChannelID - ${channelID}`);
 
 		// Removes tasks after 5 minutes.
 		this.taskQueue[clientID].timeout = setTimeout(() => delete this.taskQueue[clientID], 300000);
+	}
+
+	hasTask(clientID) {
+		return this.taskQueue[clientID] != null;
 	}
 
 	async handleTask(clientID, message, data) {
@@ -244,18 +248,21 @@ class Commands {
 			try{
 				if(message.content.toLowerCase() != 'c') {
 					if(task.command.settings.allowDM == (message.channel.type == 'dm') || message.channel.id == task.channel_id) {
-						moreTasks = await task.execute(data);
+						moreTasks = await task.execute(data, task.persistant_data);
 					}
+				}
+				else{
+					message.reply('Canceled');
 				}
 			}
 			catch(e) {
 				this.logger.localErr('Failed to execute task');
-				this.logger.localErr(e);
+				this.logger.localErr(e, true);
 			}
 
 			// Handle the continuation of the task command if needed
 			if(moreTasks && typeof (moreTasks) == 'function') {
-				task.func = moreTasks;
+				task.execute = moreTasks;
 			}
 			else{
 				delete this.taskQueue[clientID];
