@@ -38,8 +38,24 @@ module.exports = {
 		else{
 			data.message.reply('Could not find project id!');
 		}
+	},
+
+	onMemberJoin: async function(data) {
+		let found = false;
+
+		let projectTitles = '';
+
+		for(const project of data.cache.projects.projects) {
+			if(project.ownerid == data.member.id || project.memberids.includes(data.member.id)) {
+				found = true;
+				data.cache.projects.addMember(project.id, data.member.id);
+				projectTitles += '\'*' + project.title + '*\' ';
+			}
+		}
+
+
+		if(found) {
+			return 'Projects joined: ' + projectTitles;
+		}
 	}
 };
-
-
-// TODO: Past life - Make sure to check ownership
