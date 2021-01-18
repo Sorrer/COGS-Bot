@@ -12,7 +12,7 @@ class ChannelTools {
 
 		const category = channels.resolve(categoryID);
 
-		if(category == null) {
+		if(category == null && categoryID != false) {
 			logger.logErr('Tried to create channel for invalid categoryID', 'Could not find categoryID - ' + categoryID);
 			return 'failed-invalid-channel';
 		}
