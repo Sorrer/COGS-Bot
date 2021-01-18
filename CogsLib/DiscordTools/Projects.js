@@ -115,6 +115,17 @@ class Projects {
 
 	}
 
+	async getProjectFromChannel(channelid) {
+		const projectResults = await this.cache.mysqlCon.query('SELECT projectid FROM cogsprojects.projects WHERE textchannelid = ?', [channelid]);
+
+		if(projectResults.results[0] != null) {
+			return await this.get(projectResults[0].projectid);
+		}
+		else{
+			return null;
+		}
+
+	}
 
 	// Core usages
 	async get(projectid) {
