@@ -101,8 +101,8 @@ class Projects {
 
 		const project = {
 			id: projectid,
-			title: projectInfo.results[0].title,
-			description: projectInfo.results[0].description,
+			title: projectInfo.results[0].title.toString('utf-8'),
+			description: projectInfo.results[0].description.toString('utf-8'),
 			ownerid: projectInfo.results[0].ownerid,
 			textchannelid: projectInfo.results[0].textchannelid,
 			voicechannelid: projectInfo.results[0].voicechannelid,
@@ -248,11 +248,19 @@ class Projects {
 			return;
 		}
 
-		if(project.categoryid == null) {
+		const categoryTest = this.cache.guild.channels.resolve(project.categoryid);
 
-			const newCategory = await this.cache.channeltools.createChannel(project.title, this.projectsCategory, 'category');
+		if(project.categoryid == null || categoryTest == null) {
+			const newCategory = await this.cache.channeltools.createChannel(project.title, false, 'category');
 
 			await newCategory.setPosition(this.projectsCategory.position + 1);
+			await newCategory.overwritePermissions([{
+				id: this.cache.bot.user.id,
+				allow: ['VIEW_CHANNEL']
+			}, {
+				id: this.cache.guild.roles.everyone,
+				deny: ['VIEW_CHANNEL']
+			}]);
 
 			this.projects[projectid].categoryid = newCategory.id;
 			project.categoryid = newCategory.id;
@@ -260,12 +268,17 @@ class Projects {
 
 		}
 
-
 		const newChannel = await this.cache.channeltools.createChannel(name, project.categoryid, type);
 
-		await this.cache.mysqlCon.query('INSERT INTO cogsprojects.channels (serverid, projectid, channelid, channeltype) VALUES (?,?,?)', [this.cache.serverid, projectid, newChannel.id, type]);
+		await this.cache.mysqlCon.query('INSERT INTO cogsprojects.channels (serverid, projectid, channelid, channeltype) VALUES (?,?,?, ?)', [this.cache.serverid, projectid, newChannel.id, type]);
 
 		this.projects[projectid].channelids.push(newChannel.id);
+
+		for(const userid of this.projects[projectid].memberids) {
+			this.cache.channeltools.addProjectUser(newChannel, userid, false);
+		}
+
+		this.cache.channeltools.addProjectUser(newChannel, project.ownerid, true);
 
 		await this.cache.logger.log('Created channel for project', 'Created channel <#' + newChannel.id + '> for project ' + project.title);
 
@@ -285,14 +298,26 @@ class Projects {
 			return 'invalid-channel';
 		}
 
-		await this.cache.mysqlCon.query('DELETE FROM cogsprojects.channels WHERE channelid = ? AND projectid = ? AND serverid = ? LIMIT 1', channelid, projectid, this.cache.serverid);
 
 		await this.cache.channeltools.deleteChannel(channelid);
+
+		await this.cache.mysqlCon.query('DELETE FROM cogsprojects.channels WHERE channelid = ? AND projectid = ? AND serverid = ? LIMIT 1', [channelid, projectid, this.cache.serverid]);
 
 		this.projects[projectid].channelids = this.projects[projectid].channelids.filter((item) => item !== channelid);
 
 
 		await this.cache.logger.log('Deleted channel for project', 'Delete channel <#' + channelid + '> for project ' + this.projects[projectid].title);
+
+		if(this.projects[projectid].channelids.length == 0) {
+			const category = this.cache.guild.channels.resolve(this.projects[projectid].categoryid);
+
+			category.delete();
+
+			this.projects[projectid].categoryid = null;
+
+			await this.cache.mysqlCon.query('UPDATE cogsprojects.projects SET categoryid = null WHERE projectid = ? AND serverid = ?', [projectid, this.cache.serverid]);
+		}
+
 
 		return true;
 	}

@@ -40,7 +40,7 @@ class ChannelTools {
 		if(archiveid != null) {
 			const archiveCategory = this.cache.guild.channels.resolve(archiveid);
 
-			if(archiveCategory.type == 'category') {
+			if(archiveCategory.type == 'category' && channel.type == 'text') {
 				await this.cache.logger.log('Moving channel to archive.', '<#' + channelid + '>');
 				await channel.setParent(archiveCategory);
 				return;
