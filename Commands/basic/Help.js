@@ -30,7 +30,12 @@ module.exports = {
 			for(const category in data.commandscategorized) {
 				for(const command of data.commandscategorized[category]) {
 					if(command.description.command === data.params[0].toLowerCase() || command.description.name == data.params[0]) {
-						if(data.userdata.privilege >= command.settings.privilege) {
+						if(module.exports.hasPrivilege(data, command)) {
+
+							if(command.settings.onlyTestServer && (data.cache.getSetting && !data.cache.getSetting('istestserver'))) {
+								continue;
+							}
+
 							helpString = command.description.usage + '\n' + '> ' + data.cache.prefix + command.description.description;
 							commandName = command.description.name;
 						}
@@ -48,7 +53,7 @@ module.exports = {
 
 						let helpCommandsString = '';
 						for(const command of data.commandscategorized[category]) {
-							if(command.settings.privilege <= data.userdata.privilege) {
+							if(module.exports.hasPrivilege(data, command)) {
 								if(command.settings.onlyTestServer && (data.cache.getSetting && !data.cache.getSetting('istestserver'))) {
 									continue;
 								}
@@ -91,7 +96,7 @@ module.exports = {
 		for(const category in data.commandscategorized) {
 			let helpCommandsString = '';
 			for(const command of data.commandscategorized[category]) {
-				if(command.settings.privilege <= data.userdata.privilege) {
+				if(module.exports.hasPrivilege(data, command)) {
 					if(command.settings.onlyTestServer && (data.cache.getSetting && !data.cache.getSetting('istestserver'))) {
 						continue;
 					}
@@ -117,5 +122,12 @@ module.exports = {
 		data.message.channel.send(embededmsg);
 
 
+	},
+
+	hasPrivilege: function(data, command) {
+		if(command.requireProjectOwner && !data.userdata.ownsproject) return false;
+		if(command.category == 'Project' && data.cache && data.userdata.privilege < data.cache.getSetting('projectprivilege')) return false;
+		if(data.userdata.privilege < command.settings.privilege) return false;
+		return true;
 	}
 };
