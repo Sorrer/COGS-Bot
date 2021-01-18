@@ -121,7 +121,7 @@ class Projects {
 		const projectResults = await this.cache.mysqlCon.query('SELECT projectid FROM cogsprojects.projects WHERE textchannelid = ?', [channelid]);
 
 		if(projectResults.results[0] != null) {
-			return await this.get(projectResults[0].projectid);
+			return await this.get(projectResults.results[0].projectid);
 		}
 		else{
 			return null;
@@ -231,7 +231,7 @@ class Projects {
 	}
 
 	async createChannel(name, projectid, type) {
-		if(type != 'text' || type != 'voice') {
+		if(type != 'text' && type != 'voice') {
 			this.cache.logger.localErr('Tried to create project channel with invalid type \'' + type + '\'');
 			return null;
 		}
@@ -265,7 +265,7 @@ class Projects {
 
 		await this.cache.mysqlCon.query('INSERT INTO cogsprojects.channels (serverid, projectid, channelid, channeltype) VALUES (?,?,?)', [this.cache.serverid, projectid, newChannel.id, type]);
 
-		project.channelids.push(newChannel.id);
+		this.projects[projectid].channelids.push(newChannel.id);
 
 		await this.cache.logger.log('Created channel for project', 'Created channel <#' + newChannel.id + '> for project ' + project.title);
 
@@ -275,6 +275,16 @@ class Projects {
 
 	async deleteChannel(channelid, projectid) {
 
+		const project = await this.get(projectid);
+
+		if(project == null || project == false) {
+			return 'invalid-project';
+		}
+
+		if(!project.channelids.includes(channelid)) {
+			return 'invalid-channel';
+		}
+
 		await this.cache.mysqlCon.query('DELETE FROM cogsprojects.channels WHERE channelid = ? AND projectid = ? AND serverid = ? LIMIT 1', channelid, projectid, this.cache.serverid);
 
 		await this.cache.channeltools.deleteChannel(channelid);
@@ -282,7 +292,9 @@ class Projects {
 		this.projects[projectid].channelids = this.projects[projectid].channelids.filter((item) => item !== channelid);
 
 
-		await this.cache.logger.log('Delete channel for project', 'Delete channel <#' + channelid + '> for project ' + this.projects[projectid].title);
+		await this.cache.logger.log('Deleted channel for project', 'Delete channel <#' + channelid + '> for project ' + this.projects[projectid].title);
+
+		return true;
 	}
 
 
