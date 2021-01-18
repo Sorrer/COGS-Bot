@@ -98,6 +98,7 @@ class Projects {
 			}
 		}
 
+
 		const project = {
 			id: projectid,
 			title: projectInfo.results[0].title,
@@ -105,6 +106,7 @@ class Projects {
 			ownerid: projectInfo.results[0].ownerid,
 			textchannelid: projectInfo.results[0].textchannelid,
 			voicechannelid: projectInfo.results[0].voicechannelid,
+			categoryid: projectInfo.results[0].categoryid,
 			channelids: projectChannelsArr,
 			memberids: membersArr
 		};
@@ -236,23 +238,36 @@ class Projects {
 
 		if(!this.enabled()) return;
 
+		const project = await this.get(projectid);
 
-		if(this.projects[projectid] == null) {
+		if(project == null) {
 			this.generateProjectData(projectid);
 		}
 
-		if(this.projects[projectid] == false) {
+		if(project == false) {
 			return;
 		}
 
-		const newChannel = this.cache.channeltools.createChannel(name, this.projectsCategory, type);
+		if(project.categoryid == null) {
+
+			const newCategory = await this.cache.channeltools.createChannel(project.title, this.projectsCategory, 'category');
+
+			await newCategory.setPosition(this.projectsCategory.position + 1);
+
+			this.projects[projectid].categoryid = newCategory.id;
+			project.categoryid = newCategory.id;
+			await this.cache.mysqlCon.query('UPDATE cogsprojects.projects SET categoryid = ? WHERE projectid = ? AND serverid = ?', [newCategory.id, projectid, this.cache.serverid]);
+
+		}
+
+
+		const newChannel = await this.cache.channeltools.createChannel(name, project.categoryid, type);
 
 		await this.cache.mysqlCon.query('INSERT INTO cogsprojects.channels (serverid, projectid, channelid, channeltype) VALUES (?,?,?)', [this.cache.serverid, projectid, newChannel.id, type]);
 
-		this.projects[projectid].channelids.push(newChannel.id);
+		project.channelids.push(newChannel.id);
 
-
-		await this.cache.logger.log('Created channel for project', 'Created channel <#' + newChannel.id + '> for project ' + this.projects[projectid].title);
+		await this.cache.logger.log('Created channel for project', 'Created channel <#' + newChannel.id + '> for project ' + project.title);
 
 		return newChannel;
 	}
