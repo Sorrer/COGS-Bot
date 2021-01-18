@@ -78,6 +78,7 @@ client.on('message', async function(message) {
 
 		if(config.discord.admins.includes(message.author.id)) {
 			userdata.privilege = Number.MAX_SAFE_INTEGER;
+			userdata.isadmin = true;
 		}
 		else {
 
@@ -108,8 +109,12 @@ client.on('message', async function(message) {
 		}
 
 
-		if(serverCache.getSetting('projectsenabled') == 1) {
-		// TODO: Check if user is project owner via cache, set userdata. Maybe have this work inside commands instead, so it will only be retrieved when required. Maybe not though.
+		if(serverCache.projects.enabled()) {
+			userdata.currentproject = await serverCache.projects.getProjectFromChannel(message.channel.id);
+
+			if(userdata.currentproject.ownerid == message.author.id || userdata.isadmin === true) {
+				userdata.ownsproject = true;
+			}
 		}
 
 		commandManager.execute(serverCache, message, userdata, client);
