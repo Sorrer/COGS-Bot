@@ -31,7 +31,7 @@ module.exports = {
 			return;
 		}
 
-		if(privilege >= 1000) {
+		if(privilege >= 100) {
 			data.cache.logger.dmInvalidCommand(data.message.author.id, data.message.content, 'Invalid Privilege Number. Must be lower than 1000', data.message.channel.id);
 			return;
 		}
