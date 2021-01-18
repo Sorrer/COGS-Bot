@@ -16,7 +16,7 @@ module.exports = {
 		isTask: false,
 		allowedUsage: ['user'],
 		requireProjectOwner: false,
-		requiredParams: 0,
+		requiredParams: 1,
 		allowDM: false,
 		onlyTestServer: false
 

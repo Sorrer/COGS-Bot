@@ -356,7 +356,7 @@ class Commands {
 			return;
 		}
 
-		if(settings.requireProjectOwner === true && !userData.ownsProject) {
+		if(settings.requireProjectOwner === true && !userData.ownsproject) {
 			const invalidMessage = 'You have to own a project to use this command';
 			serverCache.logger.dmInvalidCommand(message.author.id, message.content, invalidMessage, message.channel.id, invalidMessage, message.channinvalidMessage);
 			return;
