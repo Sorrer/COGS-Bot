@@ -111,9 +111,10 @@ client.on('message', async function(message) {
 
 		if(serverCache.projects.enabled()) {
 			userdata.currentproject = await serverCache.projects.getProjectFromChannel(message.channel.id);
-
-			if(userdata.currentproject.ownerid == message.author.id || userdata.isadmin === true) {
-				userdata.ownsproject = true;
+			if(userdata.currentproject != null) {
+				if(userdata.currentproject.ownerid == message.author.id || userdata.isadmin === true) {
+					userdata.ownsproject = true;
+				}
 			}
 		}
 
