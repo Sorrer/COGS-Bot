@@ -5,7 +5,7 @@ module.exports = {
 		command: 'changetitle',
 		name: 'ChangeTitle',
 		description: 'Change the title to given name',
-		usage: 'changetitle <channelname>- Create a project channel either *text* or *voice*.',
+		usage: 'changetitle - Changes the title to the given title',
 		category: 'Project Owner'
 
 	},
