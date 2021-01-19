@@ -73,7 +73,6 @@ module.exports = {
 			await taskData.extraMessage.delete();
 		}
 		await data.message.delete();
-		console.log('weee');
 		switch(type) {
 		case 'image':
 			taskData.extraMessage = await data.message.reply('Please paste the url');
