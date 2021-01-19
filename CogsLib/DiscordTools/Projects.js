@@ -480,6 +480,26 @@ class Projects {
 		return true;
 	}
 
+	async changeDescription(description, projectid) {
+		const project = await this.get(projectid);
+
+		if(project == null || project == false) {
+			return 'invalid-project';
+		}
+
+		const oldDescription = project.description;
+
+		project.description = description;
+		this.projects[projectid].description = description;
+
+		await this.cache.mysqlCon.query('UPDATE cogsprojects.projects SET description = ? WHERE projectid = ? AND serverid = ?', [description, projectid, this.cache.serverid]);
+
+		await this.updateProjectListing(projectid);
+
+		await this.cache.logger.log('Changed description for ' + project.title, +'Old Description:\n' + oldDescription + 'New Description:\n' + description);
+
+		return true;
+	}
 }
 
 
