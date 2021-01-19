@@ -496,7 +496,7 @@ class Projects {
 
 		await this.updateProjectListing(projectid);
 
-		await this.cache.logger.log('Changed description for ' + project.title, +'Old Description:\n' + oldDescription + 'New Description:\n' + description);
+		await this.cache.logger.log('Changed description for ' + project.title, +'Old Description:\n' + oldDescription + '\nNew Description:\n' + description);
 
 		return true;
 	}
