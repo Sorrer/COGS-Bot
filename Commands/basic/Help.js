@@ -46,7 +46,6 @@ module.exports = {
 
 
 			if(commandName === false) {
-				// TODO: If no command is found, check for category
 
 				for(const category in data.commandscategorized) {
 					if(category == data.params[0]) {
