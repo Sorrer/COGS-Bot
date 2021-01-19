@@ -439,6 +439,47 @@ class Projects {
 		await this.updateProjectListing(projectid);
 	}
 
+
+	async changeTitle(title, projectid, setName = false) {
+		const project = await this.get(projectid);
+
+		if(project == null || project == false) {
+			return 'invalid-project';
+		}
+
+		if(title.length <= 2) {
+			return 'title must have more than 2 letters';
+		}
+
+
+		const lastTitle = project.title;
+		project.title = title;
+		this.projects[projectid].title = title;
+
+		if(setName) {
+
+			const ntextchannel = this.cache.guild.channels.resolve(project.textchannelid);
+			const nvoicechannel = this.cache.guild.channels.resolve(project.voicechannelid);
+
+			await ntextchannel.setName(title);
+			await nvoicechannel.setName(title + ' Voice');
+
+			const category = this.cache.guild.channels.resolve(project.categoryid);
+
+			if(category != null) {
+				await category.setName(title);
+			}
+
+		}
+		await this.updateProjectListing(projectid);
+
+		await this.cache.mysqlCon.query('UPDATE cogsprojects.projects SET title = ? WHERE projectid = ? AND serverid = ?', [title, projectid, this.cache.serverid]);
+
+		await this.cache.logger.log('Updated Project Title to ' + title, 'Changed from *' + lastTitle + '* to *' + title + '*');
+
+		return true;
+	}
+
 }
 
 
