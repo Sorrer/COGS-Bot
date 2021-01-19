@@ -155,7 +155,7 @@ module.exports = {
 		await taskData.embedMessage.delete();
 		data.message.channel.send(taskData.embed);
 
-		await data.cache.logger.log('New Embed Generated', data.author.id + ' generated a new embed in <#' + data.message.channel.id + '>');
+		await data.cache.logger.log('New Embed Generated ', '<@' + data.author.id + '> generated a new embed in <#' + data.message.channel.id + '>');
 	}
 
 	// TODO: Add extra features where you can set specific parts of the embed
