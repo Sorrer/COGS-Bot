@@ -38,7 +38,7 @@ module.exports = {
 		taskData['projectid'] = id;
 
 		const project = await data.cache.projects.get(id);
-		data.message.reply('Going to delete **' + project.title + '**\nProject has ' + project.channelids.length + 2 + ' channels\nAre you sure? (y/n)');
+		data.message.reply('Going to delete **' + project.title + '**\nProject has ' + (project.channelids.length + 2) + ' channels\nAre you sure? (y/n)');
 
 		return module.exports.taskConfirmation;
 	},

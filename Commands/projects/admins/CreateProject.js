@@ -68,8 +68,8 @@ module.exports = {
 			return;
 		}
 
-
-		const returnData = await data.cache.projects.create(taskData['description'], taskData['name'], taskData['ownerid']);
+		console.log(data.commandscategorized);
+		const returnData = await data.cache.projects.create(taskData['description'], taskData['name'], taskData['ownerid'], data.commandscategorized['Project Owner']);
 
 		if(typeof (returnData) == 'number') {
 			data.message.reply(`Project created! - ${returnData}`);

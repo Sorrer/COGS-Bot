@@ -54,7 +54,7 @@ class Projects {
 		}
 		const project = this.projects[projectid];
 		const embed = new Discord.MessageEmbed();
-		embed.setColor('#ffffff')
+		embed.setColor('#e6398f')
 			.setTitle(project.title)
 			.setDescription(project.description);
 
@@ -159,7 +159,7 @@ class Projects {
 	}
 
 
-	async create(info, name, ownerid) {
+	async create(info, name, ownerid, helpCommands) {
 
 		if(this.projectsCategory == null) {
 			return 'no-category';
@@ -194,8 +194,32 @@ class Projects {
 
 		const projectid = results.results[0].projectid;
 
-		const projectMessage = await textChannel.send('Projectid: ' + projectid + '\n INSERT HOW TO MESSAGE HERE');
-		projectMessage.pin();
+		const embed = new Discord.MessageEmbed();
+
+		embed.setTitle('Project id - ' + projectid);
+		embed.setDescription('Welcome to your project!\nEnjoy this space to develop and communicate with teammembers! \n Your project id is **' + projectid + '**. This will be used for other people to join.\n\nIf you need any help or have any questions ask any board member!');
+
+		const helpEmbed = new Discord.MessageEmbed();
+
+		let helpString = '';
+
+		for(const command of helpCommands) {
+			helpString += command.description.usage + '\n';
+		}
+
+		helpEmbed.setTitle('Project Commands');
+		helpEmbed.setDescription('These commands will help you to customize your space!\n\n' + helpString);
+
+		embed.setColor('#da42f5');
+		helpEmbed.setColor('#4eed66');
+
+		const projectMessage = await textChannel.send(embed);
+		const helpMessage = await textChannel.send(helpEmbed);
+
+		await helpMessage.pin();
+		await projectMessage.pin();
+
+
 		// Setup cache
 		await this.generateProjectData(projectid);
 
@@ -217,6 +241,10 @@ class Projects {
 
 		for(const channelid of project.channelids) {
 			await this.cache.channeltools.deleteChannel(channelid);
+		}
+
+		if(project.categoryid != null) {
+			await this.cache.channeltools.deleteChannel(project.categoryid);
 		}
 
 		await this.deleteProjectListing(projectid);

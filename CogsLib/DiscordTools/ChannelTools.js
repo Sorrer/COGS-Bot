@@ -68,7 +68,8 @@ class ChannelTools {
 			if(isOwner) {
 				channel.updateOverwrite(user, {
 					VIEW_CHANNEL: true,
-					MANAGE_MESSAGES: true
+					MANAGE_MESSAGES: true,
+					MENTION_EVERYONE: true
 				});
 			}
 			else{
