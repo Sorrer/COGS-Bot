@@ -25,6 +25,22 @@ class Logger {
 
 	}
 
+	async setRequestChannel(channelid) {
+		if(this.server.id == null || this.bot == null) {
+			this.localDebug('Tried to set request channel without having a server guild set or a bot. This should not happen!');
+		}
+
+		const server = await this.bot.guilds.fetch(this.server.id);
+
+		if(server == null) {
+			this.localErr('Can not find server for setting log channel', true);
+		}
+
+		const channel = server.channels.resolve(channelid);
+		this.log('Request channel set - ' + channel.id);
+		this.requestChannel = channel;
+	}
+
 	async setLogChannel(channelid) {
 		if(this.server.id == null || this.bot == null) {
 			this.localDebug('Tried to set log channel without having a server guild set or a bot. This should not happen!');
@@ -119,7 +135,23 @@ class Logger {
 	}
 
 	logErr(errMessage, details) {
-		this.log(errMessage, details, '#f5425d');
+		return this.log(errMessage, details, '#f5425d');
+	}
+
+	request(title, msg, color = '#f5425d') {
+		if(!this.requestChannel) {
+			this.local(title + color + '\n' + msg);
+			return;
+		}
+		else{
+			this.saveLog(title);
+			this.saveLog(msg);
+		}
+
+		// Generate embeded and log
+		const embed = this.generateMsg(title, msg, color);
+
+		return this.requestChannel.send(embed);
 	}
 
 	dm(receiverID, title, msg, color = '#ffffff', channelid = null, channelmsg = null) {

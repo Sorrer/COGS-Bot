@@ -147,6 +147,9 @@ class ServerCache {
 		case 'projects':
 			await this.projects.setProjectsCategory(channelid);
 			break;
+		case 'requests':
+			await this.logger.setRequestChannel(channelid);
+			break;
 		}
 	}
 
@@ -256,8 +259,6 @@ class ServerCache {
 		}
 	}
 
-	// TODO: Projects cache, get/set/create/delete;
-	// TODO: Projects extra channel cache, get/set/create/delete;
 	// TODO: Event channel cache, get/create/delete;
 }
 
