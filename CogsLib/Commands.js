@@ -221,13 +221,13 @@ class Commands {
 	}
 
 
-	addTask(clientID, channelID, function_, command, data = {}) {
+	addTask(clientID, channelID, function_, command, data = {}, persistant_data = {}) {
 		if(this.taskQueue[clientID] != null) {
 			clearTimeout(this.taskQueue[clientID].timeout);
 			delete this.taskQueue[clientID];
 		}
 
-		this.taskQueue[clientID] = { id: clientID, channel_id: channelID, execute: function_, command: command, data: data, persistant_data: {} };
+		this.taskQueue[clientID] = { id: clientID, channel_id: channelID, execute: function_, command: command, data: data, persistant_data: persistant_data };
 		this.logger.localDebug(`Added new task for ${command.description.name}. ClientID - ${clientID}. ChannelID - ${channelID}`);
 
 		// Removes tasks after 5 minutes.
@@ -369,12 +369,12 @@ class Commands {
 
 		// Command identity matches to the one that is trying to executed, execute the command.
 		try{
-
-			const executeReturn = await command.execute(data);
+			const taskData = {};
+			const executeReturn = await command.execute(data, taskData);
 
 			if(settings.isTask == true) {
 				if(typeof executeReturn == 'function') {
-					this.addTask(message.author.id, message.channel.id, executeReturn, command);
+					this.addTask(message.author.id, message.channel.id, executeReturn, command, data, taskData);
 				}
 			}
 
