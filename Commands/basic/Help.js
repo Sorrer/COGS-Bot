@@ -47,8 +47,11 @@ module.exports = {
 
 			if(commandName === false) {
 
+				const content = data.message.content;
+				const userCategory = content.substring(content.indexOf(' ') + 1);
 				for(const category in data.commandscategorized) {
-					if(category == data.params[0]) {
+					if(category == userCategory) {
+
 
 						let helpCommandsString = '';
 						for(const command of data.commandscategorized[category]) {
