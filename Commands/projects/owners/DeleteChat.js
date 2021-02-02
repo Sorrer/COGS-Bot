@@ -32,7 +32,12 @@ module.exports = {
 		else{
 			channel = data.message.guild.channels.resolve(mentionedChannel);
 		}
-
+		
+		// Todo - Try to have an auto resolve to find the channel with that specific name.
+		if(channel == null){
+			await data.message.reply('Invalid channel name! Please mention the channel (#) or copy its id!');
+			return;	
+		}
 
 		const response = await data.cache.projects.deleteChannel(channel.id, data.userdata.currentproject.id);
 
