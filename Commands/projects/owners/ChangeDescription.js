@@ -26,7 +26,7 @@ module.exports = {
 		const content = data.message.content;
 		const description = content.substring(content.indexOf(' ') + 1);
 
-		const oldDescription = data.userdata.currentproject.title;
+		const oldDescription = data.userdata.currentproject.description;
 
 		const response = await data.cache.projects.changeDescription(description, data.userdata.currentproject.id);
 
