@@ -2,6 +2,7 @@ const CommandManager = require('./CogsLib/Commands.js');
 const Logger = require('./CogsLib/Logger.js');
 const Discord = require('discord.js');
 const MysqlHandler = require('./CogsLib/MysqlHandler.js');
+const ms = require('ms')
 
 const ServerCacheManager = require('./CogsLib/ServerCache/ServerCacheManager.js');
 
@@ -61,7 +62,24 @@ async function Initiate() {
 }
 
 
-client.on('ready', function() {
+client.on('ready', async () => {
+
+ 
+	const arrayOfStatus = ["Coding Actually Good FPS", "Browsing stackoverflow","Trying to use Unreal","Developing the next Hottest game","Turning off and on", "No bugs, only features"]
+
+	let index = 0;
+    setInterval(() => {
+        if (index == arrayOfStatus.length) index = 0;
+        const status = arrayOfStatus[index];
+        client.user.setActivity(status);
+        index++;
+    }, ms("15 Minutes"));
+
+
+
+
+
+
 	logger.local('Bot connected');
 });
 
