@@ -65,7 +65,7 @@ async function Initiate() {
 client.on('ready', async () => {
 
  
-	const arrayOfStatus = ["Coding Actually Good FPS", "Browsing stackoverflow","Uninstalling Unreal","Developing the next Hottest game","Turning off and on"]
+	const arrayOfStatus = ["Coding Actually Good FPS", "Browsing stackoverflow","Trying to use Unreal","Developing the next Hottest game","Turning off and on", "No bugs, only features"]
 
 	let index = 0;
     setInterval(() => {
