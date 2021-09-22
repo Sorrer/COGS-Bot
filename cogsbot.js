@@ -65,8 +65,9 @@ async function Initiate() {
 client.on('ready', async () => {
 
  
-	const arrayOfStatus = ["Coding Actually Good FPS", "Browsing stackoverflow","Trying to use Unreal","Developing the next Hottest game","Turning off and on", "No bugs, only features"]
+	const arrayOfStatus = ["Stuck in Unity","Why is my game not running", "Generating assets","Finding secrets","Coding Actually Good FPS", "Browsing stackoverflow","Trying to use Unreal","Developing the next Hottest game","Turning off and on", "No bugs, only features"]
 
+        client.user.setActivity(arrayOfStatus[0]);
 	let index = 0;
     setInterval(() => {
         if (index == arrayOfStatus.length) index = 0;
