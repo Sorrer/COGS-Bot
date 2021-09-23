@@ -5,7 +5,7 @@ module.exports = {
 		command: 'maskprivilege',
 		name: 'MaskPrivilege',
 		description: 'Masks the users privilege with the desired number to test features. Use \'off\' to remove mask and go back to original privilege. Only works for bot admins.',
-		usage: 'maskprivilege <privilege> - Defines the server as a test server.',
+		usage: 'maskprivilege <privilege> - Masks yourself so you can test privilege levels',
 		category: 'Bot Admin'
 
 	},
