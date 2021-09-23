@@ -4,7 +4,7 @@ module.exports = {
 
 		command: 'tagchannel',
 		name: 'TagChannel',
-		description: 'Tags a channel. If channel is not supplied, it will use current channel. Used with bot subsystems. For example tagging a channel with logchannel sets the channel as logchannel for the bot to output to. Also can tag categories.\n-- **Tags** --\n> logchannel - Channel that bot logs to\n> projects - (CATEGORY) Enables project creations. All main project channels will be put here.\n> projectlistings - Projects information will be posted by the bot here\n> archive - (CATEGORY) Any bot delete channels will be put here.',
+		description: 'Tags a channel. If channel is not supplied, it will use current channel. Used with bot subsystems. For example tagging a channel with logchannel sets the channel as logchannel for the bot to output to. Also can tag categories.\n-- **Tags** --\n> logchannel - Channel that bot logs to\n> projects - (CATEGORY) Enables project creations. All main project channels will be put here.\n> projectlistings - Projects information will be posted by the bot here\n> archive - (CATEGORY) Any bot delete channels will be put here.\n> requests - Channel for changes in the discord, that the bot can not do.',
 		usage: 'tagchannel <tag> <channelid> - tags the specified channel with specific tag.',
 		category: 'Admin'
 	},
