@@ -2,7 +2,8 @@
 
 
 # COGS-Bot - V2
-https://img.shields.io/github/package-json/v/Sorrer/COGS-Bot
+![version](https://img.shields.io/github/package-json/v/Sorrer/COGS-Bot) 
+
 A Discord bot for managing Rutgers COGS Discord. https://discord.gg/aQUgesr
 
 ## (3.0 is currently being developed in the dev-3.0 branch)
