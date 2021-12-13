@@ -1,3 +1,6 @@
+<img src="https://raw.githubusercontent.com/Sorrer/COGS-Bot/main/bot-icon.png" width="180" />
+
+
 # COGS-Bot - V2
 A Discord bot for managing Rutgers COGS Discord. https://discord.gg/aQUgesr
 
