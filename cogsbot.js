@@ -3,7 +3,8 @@ const Logger = require('./CogsLib/Logger.js');
 const Discord = require('discord.js');
 const MysqlHandler = require('./CogsLib/MysqlHandler.js');
 const ms = require('ms')
-
+const fs = require('fs')
+const ascii = require("ascii-table");
 const ServerCacheManager = require('./CogsLib/ServerCache/ServerCacheManager.js');
 
 const config = require('./config.json');
@@ -17,9 +18,18 @@ const commandManager = new CommandManager('./Commands', logger);
 // Mysql Handler
 const mysqlHandler = new MysqlHandler(config.mysql, logger);
 
-
+client.slashCommands = new Discord.Collection();
 // Discord ClientID
-const client = new Discord.Client();
+const client = new Discord.Client({
+	partials: ["CHANNEL", "MESSAGE", "GUILD_MEMBER", "REACTION"],
+    intents:[Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_BANS, Discord.Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS, Discord.Intents.FLAGS.GUILD_INTEGRATIONS, Discord.Intents.FLAGS.GUILD_WEBHOOKS, Discord.Intents.FLAGS.GUILD_INVITES, Discord.Intents.FLAGS.GUILD_VOICE_STATES, Discord.Intents.FLAGS.GUILD_PRESENCES, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Discord.Intents.FLAGS.GUILD_MESSAGE_TYPING, Discord.Intents.FLAGS.DIRECT_MESSAGES, Discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS, Discord.Intents.FLAGS.DIRECT_MESSAGE_TYPING],
+    allowedMentions: {
+        parse: ['users', 'roles'],
+        repliedUser: false
+    },  
+    restTimeOffset: 0
+  }
+);
 
 // Verifier
 
@@ -64,7 +74,38 @@ async function Initiate() {
 
 client.on('ready', async () => {
 
- 
+	let slash = [];
+	let table = new ascii("Slash commands");
+
+	fs.readdirSync("./slashcmd/").forEach((dir) => {
+
+		
+		const commands = fs
+		  .readdirSync(`./slashcmd/${dir}/`)
+		  .filter((file) => file.endsWith(".js"));
+  
+		
+		for (let file of commands) {
+		  let pull = require(`./slashcmd/${dir}/${file}`);
+  
+
+		  if (pull.name) {
+  
+	
+			client.slashCommands.set(pull.name, pull);
+			slash.push(pull); 
+			table.addRow(file, "✅"); 
+		  } else {
+			table.addRow(file, `❌  -> missing command parameters`); 
+			continue;
+		  }
+		}
+	  });
+	  console.log(table.toString());
+	  await client.application.commands.set(slash); 
+	  
+  
+	
 	const arrayOfStatus = ["Stuck in Unity","Why is my game not running", "Generating assets","Finding secrets","Coding Actually Good FPS", "Browsing stackoverflow","Trying to use Unreal","Developing the next Hottest game","Turning off and on", "No bugs, only features"]
 
         client.user.setActivity(arrayOfStatus[0]);
@@ -84,6 +125,37 @@ client.on('ready', async () => {
 	logger.local('Bot connected');
 });
 
+client.on('interactionCreate', async(interaction) => {
+
+	  if (interaction.isCommand()) {
+		await interaction.deferReply({ ephemeral: false }).catch(() => {});
+	
+	
+
+		const cmd = client.slashCommands.get(interaction.commandName);
+
+		if (!cmd)
+		  return interaction.followUp({
+			content: "Error Interacting With Slash Commands",
+		  });
+
+		if (cmd.permission) {
+	
+		  const authorPerms = interaction.channel.permissionsFor(
+			interaction.member
+		  );
+	
+		 
+		  if (!authorPerms || !authorPerms.has(cmd.permission))
+			return interaction.followUp({
+			  content: "You do not have perms to run this command",
+			});
+		}
+	
+		
+		cmd.run(client, interaction);
+	  }
+})
 client.on('message', async function(message) {
 
 

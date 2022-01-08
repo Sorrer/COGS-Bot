@@ -18,9 +18,11 @@
   "homepage": "",
   "dependencies": {
     "@sendgrid/mail": "^7.4.0",
+    "ascii-table": "^0.0.9",
     "crypto": "^1.0.1",
-    "discord.js": "^12.5.1",
+    "discord.js": "^13.1.0",
     "eslint": "^7.16.0",
+    "moment": "^2.29.1",
     "mysql2": "^2.2.5",
     "nodemailer": "^6.4.17",
     "walk-sync": "^2.2.0"
