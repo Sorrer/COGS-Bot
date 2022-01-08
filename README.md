@@ -1,7 +1,14 @@
+
 # COGS-Bot - V3.0
+=======
+<img src="https://raw.githubusercontent.com/Sorrer/COGS-Bot/main/bot-icon.png" width="180" />
+
+
+![version](https://img.shields.io/github/package-json/v/Sorrer/COGS-Bot) 
+
 A Discord bot for managing Rutgers COGS Discord. https://discord.gg/aQUgesr
 
-<<<<<<< HEAD
+
 ## (3.0 is currently being developed in the dev-3.0 branch)
 
 ## Usage
@@ -30,4 +37,4 @@ COGS-Bot V2
 All todo features and currently worked on features are posted on this board. https://trello.com/b/RULJsOqB/cogs-bot-todo
 =======
 CURRENTLY BEING DEVELOPED
->>>>>>> 3ec2510cf6c0f79fa758420bac2bd6c3841adfa9
+
