@@ -5,6 +5,7 @@ const moment = require('moment');
 module.exports = {
     name:'serverinfo',
     description:'Returns Info About Server',
+    permission:'ADMINISTRATOR',
     
 
     run: async (client, interaction) => {
