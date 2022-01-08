@@ -1,6 +1,5 @@
 
 # COGS-Bot - V3.0
-=======
 <img src="https://raw.githubusercontent.com/Sorrer/COGS-Bot/main/bot-icon.png" width="180" />
 
 
@@ -35,6 +34,6 @@ COGS-Bot V2
 ## Trello Board
 
 All todo features and currently worked on features are posted on this board. https://trello.com/b/RULJsOqB/cogs-bot-todo
-=======
+
 CURRENTLY BEING DEVELOPED
 
